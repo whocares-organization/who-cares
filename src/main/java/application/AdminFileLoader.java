@@ -1,63 +1,70 @@
 package application;
 
-import domain.*;
-import persistence.*;
-import java.io.*;
-import java.util.*;
+import domain.Admin;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.logging.Logger;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * Loads administrator data from an external file and converts it into Admin objects.
- * <p>
- * This class implements the AdminSourceLoader interface and provides functionality
- * to read a CSV or text file where each line contains an admin's username and password,
- * separated by a comma. The loaded Admin objects can then be stored in a repository.
- * <p>
- * Future extensions could include reading from different sources or allowing dynamic
- * addition of admins at runtime.
+ * Loads administrator data from an external file into Admin objects.
+ * Implements AdminSourceLoader to read CSV/text files with username,password.
+ * 
+ * Loaded Admin objects can be stored in a repository.
+ * Future extensions may include different sources or dynamic addition of admins.
  */
 public class AdminFileLoader implements AdminSourceLoader {
+	
+	/** Logger for logging info and errors in this class */
+	private static final Logger LOGGER = Logger.getLogger(AdminFileLoader.class.getName());
 
-    private final String fileName;
+	/** Name of the admin file to load from resources */
+	private final String fileName;
 
-    /**
-     * Constructs an AdminFileLoader for the specified file.
-     * 
-     * @param fileName the name of the file containing admin data (must be in resources)
-     */
-    public AdminFileLoader(String fileName) {
-        this.fileName = fileName;
+	/**
+	 * Constructs an AdminFileLoader for the specified file.
+	 *
+	 * @param fileName the name of the file containing admin data
+	 *                 (must be in resources)
+	 */
+
+  public AdminFileLoader(final String fileName) {
+    this.fileName = fileName;
+  }
+
+  /**
+   * Reads the file and creates Admin objects for each entry.
+   *
+   * @return a list of Admin objects loaded from the file
+   */
+  @Override
+  public List<Admin> loadAdmins() {
+    final List<Admin> admins = new ArrayList<>();
+
+    final InputStream inputStream = getClass().getClassLoader().getResourceAsStream(fileName);
+    if (inputStream == null) {
+    	LOGGER.info("File not found in resources:" + fileName);
+      return admins;
     }
 
-    /**
-     * Reads the file and creates Admin objects for each entry.
-     * 
-     * @return a list of Admin objects loaded from the file
-     */
-    @Override
-    public List<Admin> loadAdmins() {
-        List<Admin> admins = new ArrayList<>();
-        
-        InputStream inputStream = getClass().getClassLoader().getResourceAsStream(fileName);
-        if (inputStream == null) {
-            System.out.println("File not found in resources: " + fileName);
-            return admins;
+    try (BufferedReader buffer = new BufferedReader(new InputStreamReader(inputStream))) {
+      String line;
+      while ((line = buffer.readLine()) != null) {
+        String[] parts = line.split(",");
+        if (parts.length == 2) {
+          String username = parts[0].trim();
+          String password = parts[1].trim();
+          admins.add(new Admin(username, password));
         }
+      }
+      LOGGER.info("Admins loaded successfully from" + fileName + "/n");
+    } catch (IOException e) {
+      LOGGER.info("Error reading file: " + e.getMessage());
+    } 
 
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(inputStream))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                String[] parts = line.split(",");
-                if (parts.length == 2) {
-                    String username = parts[0].trim();
-                    String password = parts[1].trim();
-                    admins.add(new Admin(username, password));
-                }
-            }
-            System.out.println("Admins loaded successfully from " + fileName);
-        } catch (IOException e) {
-            System.out.println("Error reading file: " + e.getMessage());
-        }
-
-        return admins;
-    }
+    return admins;
+  }
 }
