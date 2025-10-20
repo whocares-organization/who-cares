@@ -42,8 +42,9 @@ public class MainApp {
    * Main entry point of the application.
    *
    * @param args command-line arguments (not used)
+ * @throws Exception 
    */
-  public static void main(String[] args) {
+  public static void main(String[] args) throws Exception {
     AdminFileLoader fileLoader = new AdminFileLoader("admins.txt");
     adminService.loadAdmins(fileLoader);
     setBook(bookService);

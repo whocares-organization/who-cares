@@ -41,13 +41,12 @@ public class AdminFileLoader implements AdminSourceLoader {
    * @return a list of Admin objects loaded from the file
    */
   @Override
-  public List<Admin> loadAdmins() {
+  public List<Admin> loadAdmins() throws Exception  {
     final List<Admin> admins = new ArrayList<>();
 
     final InputStream inputStream = getClass().getClassLoader().getResourceAsStream(fileName);
     if (inputStream == null) {
-    	LOGGER.info("File not found in resources:" + fileName);
-      return admins;
+    	throw new IOException("Error reading file: " + fileName);
     }
 
     try (BufferedReader buffer = new BufferedReader(new InputStreamReader(inputStream))) {
@@ -62,7 +61,7 @@ public class AdminFileLoader implements AdminSourceLoader {
       }
       LOGGER.info("Admins loaded successfully from" + fileName + "/n");
     } catch (IOException e) {
-      LOGGER.info("Error reading file: " + e.getMessage());
+    	throw new IOException("Error reading file: " + fileName, e);
     } 
 
     return admins;

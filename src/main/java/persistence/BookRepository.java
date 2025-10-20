@@ -24,6 +24,14 @@ public class BookRepository {
     books.add(book);
   }
 
+  public static ArrayList<Book> getBooks() {
+	return books;
+}
+
+  public static void setBooks(ArrayList<Book> books) {
+	BookRepository.books = books;
+  }
+
   /**
    * Removes a book from the repository.
    *
@@ -50,11 +58,37 @@ public class BookRepository {
    * @param keyword the search keyword
    * @return a list of books matching the keyword
    */
-  public List<Book> searchBooks(String keyword) {
-    return books.stream()
-        .filter(b -> b.getTitle().contains(keyword)
-            || b.getAuthor().contains(keyword)
-            || b.getIsbn().contains(keyword))
-        .collect(Collectors.toList());
+  public static Book searchBook(String keyword) {
+	    if (keyword == null || keyword.isEmpty()) {
+	        return null;
+	    }
+
+	    String lowerKeyword = keyword.toLowerCase();
+
+	    return books.stream()
+	        .filter(b -> (b.getTitle() != null && b.getTitle().toLowerCase().contains(lowerKeyword))
+	                  || (b.getAuthor() != null && b.getAuthor().toLowerCase().contains(lowerKeyword))
+	                  || (b.getIsbn() != null && b.getIsbn().toLowerCase().contains(lowerKeyword)))
+	        .findFirst()
+	        .orElse(null); 
+	}
+  
+  public static Book findBookByIsbn(String isbn) {
+      return books.stream()
+          .filter(b -> isbn.equals(b.getIsbn()))
+          .findFirst()
+          .map(b -> {
+              
+              return b;
+          })
+          .orElseGet(() -> {
+              
+              return null;
+          });
   }
+  
+  public static void clearBooks() {
+	    books.clear();
+	}
+
 }

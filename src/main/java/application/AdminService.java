@@ -179,8 +179,9 @@ public class AdminService {
    * Loads administrators from an external source and registers them in the repository.
    *
    * @param loader an implementation of AdminSourceLoader to provide admin data
+ * @throws Exception 
    */
-  public void loadAdmins(AdminSourceLoader loader) {
+  public void loadAdmins(AdminSourceLoader loader) throws Exception {
     List<Admin> admins = loader.loadAdmins();
     for (Admin admin : admins) {
       repository.addAdmin(admin);

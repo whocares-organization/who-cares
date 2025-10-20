@@ -1,6 +1,8 @@
 package application;
 
 import domain.Admin;
+
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -19,6 +21,7 @@ public interface AdminSourceLoader {
    * Loads administrators from a specific source.
    *
    * @return a list of Admin objects loaded from the source; empty if none found
+ * @throws Exception 
    */
-  List<Admin> loadAdmins();
+  List<Admin> loadAdmins() throws Exception;
 }

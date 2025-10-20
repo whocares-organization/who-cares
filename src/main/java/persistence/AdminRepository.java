@@ -42,13 +42,21 @@ public class AdminRepository {
    * @return the Admin object if found, or null if no matching admin exists
    */
   public static Admin findAdminByEmail(String userName) {
-    for (Admin admin : admins) {
-      if (admin.getUsername().equals(userName)) {
-    	LOGGER.info("Admin '" + userName + "' found");
-        return admin;
-      }
-    }
-    LOGGER.warning("Admin '" + userName + "' not found");
-    return null;
-  }
+	    return admins.stream()
+	        .filter(admin -> admin.getUsername().equals(userName))
+	        .findFirst()
+	        .map(admin -> {
+	            LOGGER.info("Admin '" + userName + "' found");
+	            return admin;
+	        })
+	        .orElseGet(() -> {
+	            LOGGER.warning("Admin '" + userName + "' not found");
+	            return null;
+	        });
+	}
+
+  public static void clearAdmins() {
+	    admins.clear();
+	}
+  
 }
