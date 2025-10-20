@@ -14,6 +14,13 @@ public class Book {
   private String isbn;
   private boolean isBorrowed;
 
+  public Book(String title, String author, String isbn) {
+	super();
+	this.title = title;
+	this.author = author;
+	this.isbn = isbn;
+}
+
   /**
    * Default constructor. Initializes an empty book object.
    */
