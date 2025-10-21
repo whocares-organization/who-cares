@@ -1,5 +1,7 @@
 package domain;
 
+import java.time.LocalDate;
+
 /**
  * Represents a book in the library system.
  * 
@@ -12,8 +14,11 @@ public class Book {
   private String title;
   private String author;
   private String isbn;
+  //private LocalDate borrowDate;
+ // private LocalDate dueDate;
   private boolean isBorrowed;
-
+//  private boolean isOverdue;
+  
   public Book(String title, String author, String isbn) {
 	super();
 	this.title = title;
@@ -129,4 +134,58 @@ public class Book {
         + ", isbn='" + isbn + '\'' 
         + '}';
   }
+  
+  
+  
+  
+  
+  /**
+   * Gets the date when the book was borrowed.
+   *
+   * @return the borrow date of the book
+   */
+ /* public LocalDate getBorrowDate() {
+	return borrowDate;
+  }
+  /**
+   * Sets the date when the book was borrowed.
+   *
+   * @param borrowDate the date the book was borrowed
+   */
+ /* public void setBorrowDate(LocalDate borrowDate) {
+	this.borrowDate = borrowDate;
+  }
+  /**
+   * Gets the due date when the book should be returned.
+   *
+   * @return the due date of the book
+   */
+  /*public LocalDate getDueDate() {
+	return dueDate;
+  }
+
+  /**
+   * Sets the due date when the book should be returned.
+   *
+   * @param dueDate the date the book must be returned
+   */
+ /* public void setDueDate(LocalDate dueDate) {
+	this.dueDate = dueDate;
+  }
+  /**
+   * Checks whether the book is overdue.
+   *
+   * @return true if the book is overdue, false otherwise
+   */
+ /* public boolean isOverdue() {
+	return isOverdue;
+  }
+  /**
+   * Sets the overdue status of the book.
+   *
+   * @param isOverdue true if the book is overdue, false otherwise
+   */
+  /*public void setOverdue(boolean isOverdue) {
+	this.isOverdue = isOverdue;
+  }*/
 }

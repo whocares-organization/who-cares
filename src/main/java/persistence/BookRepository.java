@@ -90,5 +90,21 @@ public class BookRepository {
   public static void clearBooks() {
 	    books.clear();
 	}
+  
+  /**
+   * Retrieves a list of all books stored in the repository.
+   *
+   * <p>This method returns a new {@link ArrayList} containing all the books
+   * from the internal collection, preventing external modification of the
+   * original list.</p>
+   *
+   * @return a list of all books in the repository
+   */
 
+  public static List<Book> findAll() {
+      return new ArrayList<>(books);
+  }
+  
+  
+  
 }

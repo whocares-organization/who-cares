@@ -94,6 +94,8 @@ public class Admin {
    * @return true if the provided password matches the current password, false otherwise
    */
   public boolean checkPassword(String password) {
-    return this.password.equals(password);
+      return this.password != null && this.password.equals(password);
   }
+
+
 }
