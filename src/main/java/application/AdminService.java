@@ -67,13 +67,13 @@ public class AdminService {
 	        return null;
 	    }
 	  
-	  Admin existingAdmin  = repository.findAdminByEmail(admin.getUsername());
+	  Admin existingAdmin  = repository.findAdminByEmail(admin.getName());
 	  if(existingAdmin!=null) {
-		  LOGGER.warning("Admin with username '" + admin.getUsername() + "' already exists");
+		  LOGGER.warning("Admin with username '" + admin.getName() + "' already exists");
 	        return false;
 	  }
 	  
-	  if (admin.getUsername() == null || admin.getUsername().isBlank()) {
+	  if (admin.getName() == null || admin.getName().isBlank()) {
 	        LOGGER.warning("Cannot register admin with empty username");
 	        return null;
 	    }
@@ -84,7 +84,7 @@ public class AdminService {
 	    }
 	  
 	  repository.addAdmin(admin);
-	    LOGGER.info("Admin '" + admin.getUsername() + "' registered successfully");
+	    LOGGER.info("Admin '" + admin.getName() + "' registered successfully");
 	    return true;
   }
 
@@ -99,14 +99,14 @@ public class AdminService {
 	        return null;
 	    }
 
-	    Admin existingAdmin = repository.findAdminByEmail(admin.getUsername());
+	    Admin existingAdmin = repository.findAdminByEmail(admin.getName());
 	    if (existingAdmin == null) {
-	        LOGGER.warning("Cannot remove admin '" + admin.getUsername() + "' because it does not exist");
+	        LOGGER.warning("Cannot remove admin '" + admin.getName() + "' because it does not exist");
 	        return false;
 	    }
 
 	    repository.removeAdmin(admin);
-	    LOGGER.info("Admin '" + admin.getUsername() + "' removed successfully");
+	    LOGGER.info("Admin '" + admin.getName() + "' removed successfully");
 	    return true;
   }
 

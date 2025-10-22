@@ -1,54 +1,27 @@
 package domain;
 
-import java.util.UUID;
-
 /**
  * Represents a library member who can borrow books and manage fines.
  *
- * <p>This class stores the member’s basic information including their
- * unique ID, name, and current fine balance. It provides methods to
- * add fines, pay fines, and determine whether the member is eligible
- * to borrow books.</p>
+ * <p>The {@code Member} class extends {@link Person} and adds functionality
+ * specific to library members, including fine management and borrowing eligibility.</p>
  */
-public class Member {
+public class Member extends Person {
 
-    /** A unique identifier automatically assigned to each member. */
-    private String memberId;
-
-    /** The full name of the member. */
-    private String name;
-
-    /** The total outstanding fine balance for the member. */
+    /** The total fine balance owed by the member. */
     private double fineBalance;
 
     /**
-     * Constructs a new {@code Member} with the specified name.
-     * A unique ID is automatically generated and the fine balance is initialized to zero.
+     * Constructs a new {@code Member} with the specified ID, name, and password.
+     * The fine balance is initialized to zero.
      *
-     * @param name the name of the member
+     * @param id the unique ID of the member
+     * @param name the member's full name
+     * @param password the password used for authentication
      */
-    public Member(String name) {
-        this.memberId = UUID.randomUUID().toString();
-        this.name = name;
+    public Member(String id, String name, String password) {
+        super(id, name, password);
         this.fineBalance = 0.0;
-    }
-
-    /**
-     * Returns the unique ID of the member.
-     *
-     * @return the member’s ID
-     */
-    public String getMemberId() {
-        return memberId;
-    }
-
-    /**
-     * Returns the name of the member.
-     *
-     * @return the member’s name
-     */
-    public String getName() {
-        return name;
     }
 
     /**
@@ -61,47 +34,35 @@ public class Member {
     }
 
     /**
-     * Adds a fine amount to the member’s account.
+     * Adds a fine amount to the member's account.
      *
-     * <p>This method increases the fine balance by the specified amount.
-     * It ignores negative or zero amounts.</p>
-     *
-     * @param amount the amount to add as a fine
+     * @param amount the amount to add to the fine balance
      */
     public void addFine(double amount) {
-        if (amount > 0) {
-            fineBalance += amount;
-            System.out.println("Fine of " + amount + " added. Total fine: " + fineBalance);
-        }
+        fineBalance += amount;
     }
 
     /**
-     * Pays part or all of the member’s fine.
+     * Pays part or all of the member's fine balance.
      *
-     * <p>If the payment amount exceeds the fine balance, the fine is cleared
-     * and a message is displayed. Negative or zero payments are ignored.</p>
+     * <p>If the payment amount exceeds the current fine balance, an appropriate
+     * message is displayed and the balance remains unchanged.</p>
      *
      * @param amount the amount to pay toward the fine
      */
     public void payFine(double amount) {
-        if (amount <= 0) {
-            System.out.println("Invalid payment amount.");
-            return;
-        }
-
         if (amount <= fineBalance) {
             fineBalance -= amount;
             System.out.println("Paid " + amount + ". Remaining fine: " + fineBalance);
         } else {
-            System.out.println("Payment exceeds fine balance. Full fine paid.");
-            fineBalance = 0;
+            System.out.println("Amount exceeds fine balance.");
         }
     }
 
     /**
      * Determines whether the member is eligible to borrow books.
      *
-     * <p>A member can borrow books only if their fine balance is zero.</p>
+     * <p>A member can only borrow books if their fine balance is zero.</p>
      *
      * @return {@code true} if the member can borrow books, {@code false} otherwise
      */
@@ -117,7 +78,7 @@ public class Member {
     @Override
     public String toString() {
         return "Member{" +
-                "memberId='" + memberId + '\'' +
+                "id='" + id + '\'' +
                 ", name='" + name + '\'' +
                 ", fineBalance=" + fineBalance +
                 '}';

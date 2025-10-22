@@ -25,7 +25,7 @@ public class MemberRepository {
             throw new IllegalArgumentException("Member cannot be null");
         }
         boolean exists = members.stream()
-                .anyMatch(m -> m.getMemberId().equals(member.getMemberId()) 
+                .anyMatch(m -> m.getId().equals(member.getId()) 
                             || m.getName().equalsIgnoreCase(member.getName()));
         if (!exists) {
             members.add(member);
@@ -64,7 +64,7 @@ public class MemberRepository {
      */
     public static Member findById(String memberId) {
         return members.stream()
-                .filter(m -> m.getMemberId().equals(memberId))
+                .filter(m -> m.getId().equals(memberId))
                 .findFirst()
                 .orElse(null);
     }

@@ -1,4 +1,4 @@
-package domaintest;
+package applicationtest;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -8,12 +8,8 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import domain.Admin;
+class LoanServiceTest {
 
-class AdminTest {
-
-	  private Admin admin;
-	
 	@BeforeAll
 	static void setUpBeforeClass() throws Exception {
 	}
@@ -24,22 +20,15 @@ class AdminTest {
 
 	@BeforeEach
 	void setUp() throws Exception {
-		admin = new Admin("1","user1", "12345");
 	}
 
 	@AfterEach
 	void tearDown() throws Exception {
-		admin = null;
 	}
 
 	@Test
-    void testCheckPasswordCorrect() {
-        assertTrue(admin.checkPassword("12345"));
-    }
-
-    @Test
-    void testCheckPasswordIncorrect() {
-        assertFalse(admin.checkPassword("wrong"));
-    }
+	void test() {
+		fail("Not yet implemented");
+	}
 
 }

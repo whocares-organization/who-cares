@@ -48,7 +48,7 @@ class AdminFileLoaderTest {
 		assertFalse(existingAdmins.isEmpty(), "Admins list should not be empty");
 		
 		Admin first = existingAdmins.get(0);
-        assertEquals("Mohammad", first.getUsername());
+        assertEquals("Mohammad", first.getName());
         assertEquals("12345", first.getPassword());
 	}
 	
