@@ -43,7 +43,7 @@ public class AdminRepository {
    */
   public static Admin findAdminByEmail(String userName) {
 	    return admins.stream()
-	        .filter(admin -> admin.getUsername().equals(userName))
+	        .filter(admin -> admin.getName().equals(userName))
 	        .findFirst()
 	        .map(admin -> {
 	            LOGGER.info("Admin '" + userName + "' found");
