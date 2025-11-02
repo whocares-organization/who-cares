@@ -21,17 +21,7 @@ public class MemberRepository {
      * @param member the {@link Member} object to add
      */
     public static void addMember(Member member) {
-        if (member == null) {
-            throw new IllegalArgumentException("Member cannot be null");
-        }
-        boolean exists = members.stream()
-                .anyMatch(m -> m.getId().equals(member.getId()) 
-                            || m.getName().equalsIgnoreCase(member.getName()));
-        if (!exists) {
-            members.add(member);
-        } else {
-            System.out.println("Member already exists: " + member.getName());
-        }
+    	members.add(member);
     }
 
     /**
@@ -44,14 +34,14 @@ public class MemberRepository {
     }
 
     /**
-     * Finds a member by name (case-insensitive).
+     * Finds a member by userName/ Email (case-insensitive).
      *
-     * @param name the member's name
+     * @param userName the member's userName
      * @return the matching {@link Member} or null if not found
      */
-    public static Member findByName(String name) {
+    public static Member findMemberByEmail(String userName) {
         return members.stream()
-                .filter(m -> m.getName().equalsIgnoreCase(name))
+                .filter(m -> m.getUserName().equalsIgnoreCase(userName))
                 .findFirst()
                 .orElse(null);
     }
@@ -82,7 +72,7 @@ public class MemberRepository {
     /**
      * Clears all members from the repository (useful for testing).
      */
-    public static void clear() {
+    public static void clearMembers() {
         members.clear();
     }
 }

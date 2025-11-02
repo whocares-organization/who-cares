@@ -19,7 +19,7 @@ import persistence.BookRepository;
 public class BookService {
 	 private static final Logger LOGGER = Logger.getLogger(AdminFileLoader.class.getName());
 
-  private BookRepository repository;
+	 private BookRepository repository;
 
   /**
    * Default constructor.

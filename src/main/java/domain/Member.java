@@ -19,10 +19,25 @@ public class Member extends Person {
      * @param name the member's full name
      * @param password the password used for authentication
      */
-    public Member(String id, String name, String password) {
-        super(id, name, password);
+    public Member(String userName, String password) {
+        super(userName, password);
         this.fineBalance = 0.0;
     }
+    
+    public Member(String id, String userName, String password) {
+        super(id, userName, password);
+        this.fineBalance = 0.0;
+    }
+    
+    /** Default Constructor. */
+    public Member() {
+    	
+    }
+    
+    public Member(String userName, String password, String name, String id, String phone) {
+        super(userName, password, name, id, phone);
+        this.fineBalance = 0.0;
+     }
 
     /**
      * Returns the current fine balance of the member.
@@ -33,32 +48,42 @@ public class Member extends Person {
         return fineBalance;
     }
 
+    public void setFineBalance(double fineBalance) {
+		this.fineBalance = fineBalance;
+	}
+
     /**
      * Adds a fine amount to the member's account.
      *
      * @param amount the amount to add to the fine balance
      */
-    public void addFine(double amount) {
-        fineBalance += amount;
-    }
-
-    /**
-     * Pays part or all of the member's fine balance.
+	public void addMemberFine(double amount) { 
+		fineBalance = fineBalance + amount;
+	}
+    
+	/**
+     * Pays part or all of the member's outstanding fines.
      *
-     * <p>If the payment amount exceeds the current fine balance, an appropriate
-     * message is displayed and the balance remains unchanged.</p>
+     * <p>If the payment amount exceeds the current fine balance,
+     * only the remaining balance is cleared and any extra amount is ignored.</p>
      *
-     * @param amount the amount to pay toward the fine
+     * @param amount the amount to pay toward the fine (must be positive)
+     * @throws IllegalArgumentException if the amount is non-positive
      */
-    public void payFine(double amount) {
-        if (amount <= fineBalance) {
-            fineBalance -= amount;
-            System.out.println("Paid " + amount + ". Remaining fine: " + fineBalance);
-        } else {
-            System.out.println("Amount exceeds fine balance.");
-        }
-    }
+	public void payMemberFine(double amount) {
+	    if (amount <= 0) {
+	        throw new IllegalArgumentException("Payment amount must be positive.");
+	    }
 
+	    double currentBalance = fineBalance;
+
+	    if (amount >= currentBalance) {
+	    	fineBalance = 0.0;
+	    } else {
+	    	fineBalance = currentBalance - amount;
+	    }
+	}
+    
     /**
      * Determines whether the member is eligible to borrow books.
      *
@@ -78,8 +103,7 @@ public class Member extends Person {
     @Override
     public String toString() {
         return "Member{" +
-                "id='" + id + '\'' +
-                ", name='" + name + '\'' +
+                ", name='" + this.getName() + '\'' +
                 ", fineBalance=" + fineBalance +
                 '}';
     }
