@@ -132,4 +132,17 @@ public class LoanRepository {
                 .filter(l -> !l.isReturned() && l.isOverdue(today))
                 .collect(Collectors.toList());
     }
+
+    /**
+     * Instance-level query for tests and services that prefer injected repositories.
+     * Returns active (non-returned) overdue loans for a specific member as of the given date.
+     */
+    public List<Loan> findActiveOverdueByMember(String memberId, LocalDate today) {
+        return loans.stream()
+                .filter(l -> !l.isReturned()
+                        && memberId != null
+                        && memberId.equals(l.getMemberId())
+                        && l.isOverdue(today))
+                .collect(Collectors.toList());
+    }
 }

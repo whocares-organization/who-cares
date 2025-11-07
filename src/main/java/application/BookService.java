@@ -118,6 +118,20 @@ public class BookService {
     return repository.searchBook(keyword);
   }
   
+  /**
+   * Searches for books in the repository using the currently set search strategy.
+   *
+   * <p>This method delegates the search to the {@link persistence.BookRepository} instance
+   * and returns a list of books matching the given keyword.</p>
+   *
+   * @param keyword the keyword to search for (e.g., part of title, author, or ISBN)
+   * @return a list of books matching the keyword; empty if no books match
+   * @throws IllegalStateException if no search strategy has been set in the repository
+   */
+  public List<Book> search(String keyword){
+	  return repository.search(keyword);
+  }
+  
   //=================worked by montaser===========================//////////
   
   

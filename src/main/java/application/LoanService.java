@@ -10,26 +10,31 @@ import persistence.MemberRepository;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.logging.Logger;
+import java.util.Observable; // added
 
-/**
- * Service for loan operations: borrow, return, find overdues, and display active loans.
- *
- * <p>Refactored to follow best practices:
- * <ul>
- *   <li>Delegates all search/filtering to LoanRepository.</li>
- *   <li>Orchestration and logging remain here.</li>
- *   <li>No duplicated logic; repository handles all loan queries.</li>
- * </ul>
- * </p>
- */
-public class LoanService {
+public class LoanService extends Observable { // changed to extend Observable
 
     private static final Logger LOGGER = Logger.getLogger(LoanService.class.getName());
     private static final int STANDARD_LOAN_DAYS = 28;
 
+    // New: rules and instance repository for rules checks
+    private final BorrowingRules borrowingRules;
+    private final LoanRepository loanRepository;
+
+    public LoanService() {
+        this.borrowingRules = new BorrowingRules();
+        this.loanRepository = new LoanRepository();
+    }
+
+    public LoanService(BorrowingRules borrowingRules, LoanRepository loanRepository) {
+        this.borrowingRules = borrowingRules != null ? borrowingRules : new BorrowingRules();
+        this.loanRepository = loanRepository != null ? loanRepository : new LoanRepository();
+    }
+
     public Loan borrow(String isbn, String userName) {
         Member member = getExistingMember(userName);
-        ensureMemberCanBorrow(member);
+        // Delegate borrowing validations to rules
+        borrowingRules.ensureCanBorrow(member, loanRepository);
 
         Book book = getExistingBook(isbn);
         ensureBookNotAlreadyBorrowed(isbn);
@@ -88,6 +93,22 @@ public class LoanService {
         return overdueLoans;
     }
 
+    /**
+     * Scans repository for loans that are overdue as of given date and not yet notified,
+     * updates their fine, and notifies observers exactly once per loan.
+     */
+    public void scanAndNotifyOverdues(LocalDate today) {
+        List<Loan> overdueActive = LoanRepository.findAllActiveOverdue(today);
+        for (Loan loan : overdueActive) {
+            if (!loan.isOverdueNotificationSent()) {
+                loan.calculateFine(today);
+                setChanged();
+                notifyObservers(loan);
+                loan.markOverdueNotificationSent();
+            }
+        }
+    }
+
     public void showAllLoans() {
         List<Loan> loans = LoanRepository.findAllActive();
         if (loans.isEmpty()) {
@@ -107,10 +128,7 @@ public class LoanService {
     
     public List<Loan> getOverdueLoansForMember(String memberId, LocalDate date) {
         if (memberId == null || memberId.isBlank()) return List.of();
-        return LoanRepository.findActiveByMember(memberId)
-                             .stream()
-                             .filter(loan -> loan.isOverdue(date))
-                             .toList();
+        return loanRepository.findActiveOverdueByMember(memberId, date);
     }
 
 
@@ -122,12 +140,6 @@ public class LoanService {
         Member member = MemberRepository.findMemberByEmail(userName);
         if (member == null) throw new IllegalArgumentException("Member not found");
         return member;
-    }
-
-    private void ensureMemberCanBorrow(Member member) {
-        if (!member.canBorrow()) {
-            throw new IllegalStateException("Member has unpaid fines!");
-        }
     }
 
     private Book getExistingBook(String isbn) {

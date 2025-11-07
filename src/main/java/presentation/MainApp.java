@@ -3,8 +3,13 @@ package presentation;
 import application.AdminFileLoader;
 import application.AdminService;
 import application.BookService;
+import application.EmailService;
+import application.LoanService;
+import application.OverdueEmailObserver;
 import domain.Book;
 import persistence.BookRepository;
+
+import java.time.LocalDate;
 
 /**
  * Library Management System - Main Application
@@ -37,6 +42,8 @@ public class MainApp {
 
   private static final BookRepository BOOK_REPO = new BookRepository();
   private static BookService bookService = new BookService(BOOK_REPO);
+  private static LoanService loanService = new LoanService();
+ 
 
   /**
    * Main entry point of the application.
@@ -49,23 +56,11 @@ public class MainApp {
     adminService.loadAdmins(fileLoader);
     setBook(bookService);
 
-    // =================== Just some testing =================== 
-    // Uncomment the code below to test searching or login functionality
-    // Scanner sc = new Scanner(System.in);
-    // System.out.print("Enter keyword to search: ");
-    // String keyword = sc.nextLine();
-    //
-    // List<Book> results = bookservice.searchBooks(keyword);
-    //
-    // if(results.isEmpty()) {
-    //     System.out.println("No books found.");
-    // } else {
-    //     for(Book b : results) {
-    //         System.out.println("Title: " + b.getTitle() +
-    //                            ", Author: " + b.getAuthor() +
-    //                            ", ISBN: " + b.getIsbn());
-    //     }
-    // }
+    // Register overdue email observer
+  
+
+    // Example: trigger a scan (in real app schedule daily)
+    loanService.scanAndNotifyOverdues(LocalDate.now());
   }
 
   /**

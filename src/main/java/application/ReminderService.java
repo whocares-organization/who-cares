@@ -20,11 +20,6 @@ public class ReminderService {
 
     /**
      * Sends reminder emails to all members who currently have overdue loans.
-     * <p>
-     * This method retrieves all registered members from {@link MemberService},
-     * checks their loan status using {@link LoanService}, and sends an email
-     * notification via {@link EmailService} if any overdue loans are found.
-     * </p>
      */
     public void sendOverdueReminders() {
         LocalDate today = LocalDate.now();
@@ -35,39 +30,25 @@ public class ReminderService {
 
     /**
      * Sends a reminder email to a specific member if they have overdue loans.
-     * <p>
-     * If the given member has no overdue books or the member reference is null,
-     * no email is sent. This is a more targeted alternative to
-     * {@link #sendOverdueReminders()}.
-     * </p>
-     *
-     * @param member the {@link Member} to check for overdue loans
      */
     public Boolean sendReminderToSpecificMember(Member member) {
         if (member == null) return null;
-        if(member.getUserName() == null || member.getUserName().isBlank()) return null;
+        if (member.getUserName() == null || member.getUserName().isBlank()) return null;
+
         LocalDate today = LocalDate.now();
         sendReminderToMember(member, today);
         return true;
     }
 
     /**
-     * Internal helper method that checks for overdue loans of a given member and,
-     * if found, sends a reminder email.
-     * <p>
-     * This method is used internally by {@link #sendOverdueReminders()} and
-     * {@link #sendReminderToSpecificMember(Member)}. It validates the member's
-     * username and only sends emails if there are overdue loans.
-     * </p>
-     *
-     * @param member the {@link Member} to check for overdue loans
-     * @param date   the current date used to determine which loans are overdue
+     * Internal helper method that checks for overdue loans of a given member and sends a reminder email.
      */
     private void sendReminderToMember(Member member, LocalDate date) {
         List<Loan> overdueLoans = loanService.getOverdueLoansForMember(member.getUserName(), date);
         if (!overdueLoans.isEmpty()) {
-            String message = "You have " + overdueLoans.size() + " overdue book(s).";
-            emailService.sendEmail(member.getUserName(), message);
+            String subject = "Library Overdue Reminder"; // added subject
+            String body = "You have " + overdueLoans.size() + " overdue book(s).";
+            emailService.sendEmail(member.getUserName(), subject, body); // fixed to match interface
         }
     }
 

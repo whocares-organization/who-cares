@@ -1,9 +1,13 @@
 package persistence;
 
 import domain.Book;
+
+import java.util.logging.Logger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import applicationsearchbooks.BookSearchStrategy;
 
 /**
  * Repository class for managing Book entities in temporary storage.
@@ -14,6 +18,49 @@ import java.util.stream.Collectors;
 public class BookRepository {
 
   private static ArrayList<Book> books = new ArrayList<>();
+  private BookSearchStrategy searchStrategy;
+  
+  private static final Logger logger = Logger.getLogger(BookRepository.class.getName());
+  
+  /**
+   * Sets the search strategy for the repository.
+   *
+   * <p>This allows changing the behavior of the search method dynamically.
+   * For example, you can use {@link applicationsearchbooks.TitleSearchStrategy},
+   * {@link applicationsearchbooks.AuthorSearchStrategy}, or
+   * {@link applicationsearchbooks.IsbnSearchStrategy}.</p>
+   *
+   * @param searchStrategy the search strategy to use for book searches
+   */
+  public void setSearchStrategy(BookSearchStrategy searchStrategy) {
+      this.searchStrategy = searchStrategy;
+  }
+
+  /**
+   * Searches the repository for books matching the given keyword using the currently set search strategy.
+   *
+   * <p>Logs the keyword being searched and the number of results found using the {@link java.util.logging.Logger}.</p>
+   *
+   * <p><b>Important:</b> A search strategy must be set before calling this method, otherwise
+   * an {@link IllegalStateException} is thrown.</p>
+   *
+   * @param keyword the keyword to search for (e.g., part of title, author, or ISBN)
+   * @return a list of books matching the keyword; empty if no books match
+   * @throws IllegalStateException if no search strategy has been set
+   */
+  public List<Book> search(String keyword) {
+      if (searchStrategy == null) {
+          throw new IllegalStateException("Search strategy not set.");
+      }
+
+      List<Book> result = searchStrategy.searchBook(books, keyword);
+
+      logger.info("Searching for keyword: " + keyword);
+      logger.info("Found " + result.size() + " book(s).");
+
+      return result;
+  }
+
 
   /**
    * Adds a new book to the repository.
@@ -103,6 +150,10 @@ public class BookRepository {
 
   public static List<Book> findAll() {
       return new ArrayList<>(books);
+  }
+  
+  public static List<Book> findAllBorrowed() {
+      return books.stream().filter(Book::isBorrowed).collect(java.util.stream.Collectors.toList());
   }
   
   

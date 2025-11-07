@@ -1,6 +1,7 @@
 package applicationtest;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 import java.time.LocalDate;
 import java.util.Collections;
@@ -11,6 +12,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import application.BookService;
+import application.BorrowingRules;
 import application.LoanService;
 import application.MemberService;
 import domain.Book;
@@ -26,6 +28,7 @@ class LoanServiceTest {
     private MemberService memberService;
     private BookService bookService;
 
+    // ================= Setup & Teardown =================
     @BeforeEach
     void setUp() throws Exception {
         memberService = new MemberService();
@@ -42,6 +45,7 @@ class LoanServiceTest {
         MemberRepository.clearMembers();
         LoanRepository.clearLoans();
     }
+    // ====================================================
 
     // ================= Borrow Tests =================
     @Test
@@ -53,21 +57,21 @@ class LoanServiceTest {
     }
 
     @Test
-    void borrowNonExistingBook_shouldThrowException() {
+    void borrowNonExistingBook_ShouldThrowException() {
         Exception ex = assertThrows(IllegalArgumentException.class,
                 () -> loanService.borrow("999999", "Ali"));
         assertEquals("Book not found", ex.getMessage());
     }
 
     @Test
-    void borrowNonExistingMember_shouldThrowException() {
+    void borrowNonExistingMember_ShouldThrowException() {
         Exception ex = assertThrows(IllegalArgumentException.class,
                 () -> loanService.borrow("123456", "NonExist"));
         assertEquals("Member not found", ex.getMessage());
     }
 
     @Test
-    void borrowAlreadyBorrowedBook_shouldThrowException() {
+    void borrowAlreadyBorrowedBook_ShouldThrowException() {
         loanService.borrow("123456", "Ali");
         Exception ex = assertThrows(IllegalStateException.class,
                 () -> loanService.borrow("123456", "Ali"));
@@ -75,7 +79,7 @@ class LoanServiceTest {
     }
 
     @Test
-    void borrowMemberWithUnpaidFine_shouldThrowException() {
+    void borrowMemberWithUnpaidFine_ShouldThrowException() {
         Member member = memberService.findMemberByEmail("Ali");
         member.addMemberFine(50);
         Exception ex = assertThrows(IllegalStateException.class,
@@ -83,9 +87,28 @@ class LoanServiceTest {
         assertEquals("Member has unpaid fines!", ex.getMessage());
     }
 
+    @Test
+    void borrow_DelegatesToBorrowingRules() {
+        // Arrange: mock rules and use fresh service instance
+        BorrowingRules mockRules = mock(BorrowingRules.class);
+        LoanRepository injectedRepo = new LoanRepository();
+        LoanService serviceWithMockRules = new LoanService(mockRules, injectedRepo);
+
+        // Seed required member and book (using existing services/repositories)
+        memberService.registerMember(new Member("2222", "Bob", "BobPass1"));
+        bookService.addBook(new Book("Patterns", "Author", "ISBN-PAT-1"));
+
+        // Act
+        Loan loan = serviceWithMockRules.borrow("ISBN-PAT-1", "Bob");
+
+        // Assert: ensure loan created and delegated validation invoked exactly once
+        assertNotNull(loan);
+        verify(mockRules, times(1)).ensureCanBorrow(any(Member.class), eq(injectedRepo));
+    }
+
     // ================= Return Tests =================
     @Test
-    void returnBorrowedBook_shouldMarkReturnedAndBookAvailable() {
+    void returnBorrowedBook_ShouldMarkReturnedAndBookAvailable() {
         loanService.borrow("123456", "Ali");
         loanService.returnBook("123456", "Ali");
 
@@ -94,19 +117,19 @@ class LoanServiceTest {
     }
 
     @Test
-    void returnNonExistingLoan_shouldNotThrow() {
+    void returnNonExistingLoan_ShouldNotThrow() {
         assertDoesNotThrow(() -> loanService.returnBook("999999", "Ali"));
     }
 
     @Test
-    void returnBook_bookRecordNotFound_shouldNotThrow() {
+    void returnBookWithBookRecordNotFound_ShouldNotThrow() {
         loanService.borrow("123456", "Ali");
         BookRepository.clearBooks();
         assertDoesNotThrow(() -> loanService.returnBook("123456", "Ali"));
     }
 
     @Test
-    void returnOverdueBook_shouldApplyFine() {
+    void returnOverdueBook_ShouldApplyFine() {
         Loan loan = loanService.borrow("123456", "Ali");
         LocalDate futureDate = LocalDate.now().plusDays(35);
         loanService.returnBook("123456", "Ali");
@@ -117,7 +140,7 @@ class LoanServiceTest {
 
     // ================= Overdue Tests =================
     @Test
-    void findOverdues_shouldReturnOverdueLoans() {
+    void findOverdues_ShouldReturnOverdueLoans() {
         loanService.borrow("123456", "Ali");
         LocalDate futureDate = LocalDate.now().plusDays(40);
         List<Loan> overdueLoans = loanService.findOverdues(futureDate);
@@ -125,33 +148,33 @@ class LoanServiceTest {
     }
 
     @Test
-    void findOverdues_noOverdue_shouldReturnEmpty() {
+    void findOverduesWithNoOverdue_ShouldReturnEmpty() {
         loanService.borrow("123456", "Ali");
         List<Loan> overdueLoans = loanService.findOverdues(LocalDate.now());
         assertTrue(overdueLoans.isEmpty());
     }
 
     @Test
-    void findOverdues_noLoansAtAll_shouldReturnEmpty() {
+    void findOverduesWithNoLoansAtAll_ShouldReturnEmpty() {
         List<Loan> overdueLoans = loanService.findOverdues(LocalDate.now());
         assertTrue(overdueLoans.isEmpty());
     }
 
     // ================= ShowAllLoans Tests =================
     @Test
-    void showAllLoans_shouldListActiveLoans() {
+    void showAllLoans_ShouldListActiveLoans() {
         loanService.borrow("123456", "Ali");
         assertDoesNotThrow(() -> loanService.showAllLoans());
     }
 
     @Test
-    void showAllLoans_noActiveLoans_shouldNotThrow() {
+    void showAllLoansWithNoActiveLoans_ShouldNotThrow() {
         assertDoesNotThrow(() -> loanService.showAllLoans());
     }
 
     // ================= getOverdueLoansForMember Tests =================
     @Test
-    void memberWithOverdueLoans_shouldReturnLoans() {
+    void getOverdueLoansForMember_WithOverdueLoans_ShouldReturnLoans() {
         loanService.borrow("123456", "Ali");
         LocalDate futureDate = LocalDate.now().plusDays(30);
         List<Loan> overdue = loanService.getOverdueLoansForMember("Ali", futureDate);
@@ -159,29 +182,27 @@ class LoanServiceTest {
     }
 
     @Test
-    void memberWithNoOverdueLoans_shouldReturnEmptyList() {
+    void getOverdueLoansForMember_WithNoOverdueLoans_ShouldReturnEmptyList() {
         loanService.borrow("123456", "Ali");
         List<Loan> overdue = loanService.getOverdueLoansForMember("Ali", LocalDate.now());
         assertTrue(overdue.isEmpty());
     }
 
     @Test
-    void memberWithNoLoans_shouldReturnEmptyList() {
+    void getOverdueLoansForMember_WithNoLoans_ShouldReturnEmptyList() {
         List<Loan> overdue = loanService.getOverdueLoansForMember("Ali", LocalDate.now());
         assertTrue(overdue.isEmpty());
     }
 
     @Test
-    void nullMemberId_shouldReturnEmptyList() {
+    void getOverdueLoansForMember_WithNullMemberId_ShouldReturnEmptyList() {
         List<Loan> overdue = loanService.getOverdueLoansForMember(null, LocalDate.now());
         assertTrue(overdue.isEmpty());
     }
 
     @Test
-    void blankMemberId_shouldReturnEmptyList() {
+    void getOverdueLoansForMember_WithBlankMemberId_ShouldReturnEmptyList() {
         List<Loan> overdue = loanService.getOverdueLoansForMember("  ", LocalDate.now());
         assertTrue(overdue.isEmpty());
     }
 }
-
-

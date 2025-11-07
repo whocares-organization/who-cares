@@ -107,4 +107,21 @@ public class Member extends Person {
                 ", fineBalance=" + fineBalance +
                 '}';
     }
+    
+    /**
+     * Calculates the total fines across the provided loans for this member as of the given date.
+     * Only considers this member's non-returned loans; each loan's fine is recalculated based on today.
+     */
+    public double calculateTotalFines(Iterable<Loan> loans, java.time.LocalDate today) {
+        if (loans == null) return 0.0;
+        double total = 0.0;
+        String myId = getId();
+        for (Loan loan : loans) {
+            if (loan != null && !loan.isReturned() && myId != null && myId.equals(loan.getMemberId())) {
+                loan.calculateFine(today);
+                total += loan.getFineAmount();
+            }
+        }
+        return total;
+    }
 }

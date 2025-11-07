@@ -9,22 +9,25 @@ import java.time.LocalDate;
  * Provides methods to access and modify this information.
  * </p>
  */
-public class Book {
+public class Book extends Media { // extend Media for polymorphism
 
-  private String title;
   private String author;
-  private String isbn;
-  //private LocalDate borrowDate;
- // private LocalDate dueDate;
-  private boolean isBorrowed;
-//  private boolean isOverdue;
-  
+  // retain backwards-compatible fields
+  private String isbn; // mirrors Media id
+
+  /**
+   * Constructs a Book with the specified details.
+   *
+   * @param title      the title of the book
+   * @param author     the author of the book
+   * @param isbn       the ISBN of the book
+   * @param isBorrowed true if the book is currently borrowed, false otherwise
+   */
   public Book(String title, String author, String isbn) {
-	super();
-	this.title = title;
-	this.author = author;
-	this.isbn = isbn;
-}
+    super(isbn, title);
+    this.author = author;
+    this.isbn = isbn;
+  }
 
   /**
    * Default constructor. Initializes an empty book object.
@@ -42,20 +45,20 @@ public class Book {
    * @param isBorrowed true if the book is currently borrowed, false otherwise
    */
   public Book(String title, String author, String isbn, boolean isBorrowed) {
-    super();
-    this.title = title;
+    super(isbn, title);
     this.author = author;
     this.isbn = isbn;
-    this.isBorrowed = isBorrowed;
+    setBorrowed(isBorrowed);
   }
 
+  // Backward-compatible getters/setters
   /**
    * Returns the title of the book.
    *
    * @return the book title
    */
   public String getTitle() {
-    return title;
+    return super.getTitle();
   }
 
   /**
@@ -64,7 +67,7 @@ public class Book {
    * @param title the new title
    */
   public void setTitle(String title) {
-    this.title = title;
+    super.setTitle(title);
   }
 
   /**
@@ -101,6 +104,7 @@ public class Book {
    */
   public void setIsbn(String isbn) {
     this.isbn = isbn;
+    setId(isbn);
   }
 
   /**
@@ -109,7 +113,7 @@ public class Book {
    * @return true if borrowed, false otherwise
    */
   public boolean isBorrowed() {
-    return isBorrowed;
+    return super.isBorrowed();
   }
 
   /**
@@ -118,7 +122,7 @@ public class Book {
    * @param borrowed true if the book is borrowed, false otherwise
    */
   public void setBorrowed(boolean borrowed) {
-    isBorrowed = borrowed;
+    super.setBorrowed(borrowed);
   }
 
   /**
@@ -128,64 +132,17 @@ public class Book {
    */
   @Override
   public String toString() {
-    return "Book{" 
-        + "title='" + title + '\'' 
-        + ", author='" + author + '\'' 
-        + ", isbn='" + isbn + '\'' 
-        + '}';
-  }
-  
-  
-  
-  
-  
-  /**
-   * Gets the date when the book was borrowed.
-   *
-   * @return the borrow date of the book
-   */
- /* public LocalDate getBorrowDate() {
-	return borrowDate;
-  }
-  /**
-   * Sets the date when the book was borrowed.
-   *
-   * @param borrowDate the date the book was borrowed
-   */
- /* public void setBorrowDate(LocalDate borrowDate) {
-	this.borrowDate = borrowDate;
-  }
-  /**
-   * Gets the due date when the book should be returned.
-   *
-   * @return the due date of the book
-   */
-  /*public LocalDate getDueDate() {
-	return dueDate;
+    return "Book{" + "title='" + getTitle() + '\'' + ", author='" + author + '\'' + ", isbn='" + isbn + '\'' + '}';
   }
 
-  /**
-   * Sets the due date when the book should be returned.
-   *
-   * @param dueDate the date the book must be returned
-   */
- /* public void setDueDate(LocalDate dueDate) {
-	this.dueDate = dueDate;
+  // Polymorphic contract implementation
+  @Override
+  public int getBorrowPeriod() {
+    return 28; // updated from 14 to 28 days
   }
-  /**
-   * Checks whether the book is overdue.
-   *
-   * @return true if the book is overdue, false otherwise
-   */
- /* public boolean isOverdue() {
-	return isOverdue;
+
+  @Override
+  public double getFinePerDay() {
+    return 10.0;
   }
-  /**
-   * Sets the overdue status of the book.
-   *
-   * @param isOverdue true if the book is overdue, false otherwise
-   */
-  /*public void setOverdue(boolean isOverdue) {
-	this.isOverdue = isOverdue;
-  }*/
 }
