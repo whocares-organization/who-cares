@@ -14,17 +14,19 @@ import org.junit.jupiter.api.Test;
 
 class AdminServiceTest {
 
-    private AdminService adminService; 
+    private AdminService adminService;
+    private AdminRepository repository; 
 
     @BeforeEach
     void setUp() throws Exception {
-        adminService = new AdminService();
+        repository = new AdminRepository();
+        adminService = new AdminService(repository);
         adminService.loadAdmins(new AdminFileLoader("admins.txt"));
     }
 
     @AfterEach
     void tearDown() throws Exception {
-        adminService.getRepository().clearAdmins();
+        repository.clearAdmins();
         adminService = null;
     }
 
@@ -163,7 +165,7 @@ class AdminServiceTest {
     void findExistingAdmin_ShouldReturnAdmin() {
         Admin admin = adminService.findAdminByEmail("Mohammad");
         assertNotNull(admin, "Existing admin should be found");
-        assertEquals("Mohammad", admin.getUsername());
+        assertEquals("Mohammad", admin.getUserName());
     }
 
     @Test

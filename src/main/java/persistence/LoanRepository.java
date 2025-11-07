@@ -1,38 +1,40 @@
 package persistence;
 
 import domain.Loan;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Repository class responsible for managing {@link Loan} entities in memory.
+ * Repository class responsible for managing {@link Loan} entities in-memory.
  *
- * <p>This class acts as a simple in-memory database that stores, retrieves,
- * updates, and removes loan records. It supports operations to find active loans,
- * filter by member or book, and mark loans as returned.</p>
+ * <p>Responsibilities:
+ * <ul>
+ *   <li>Store and retrieve loan records.</li>
+ *   <li>Centralize search and filtering logic for loans.</li>
+ * </ul>
  *
- * <p><b>Note:</b> Data stored here is not persistent and will be lost when the
- * application terminates.</p>
+ * <p><b>Note:</b> In-memory, non-thread-safe; data is lost when the app stops.</p>
  */
 public class LoanRepository {
 
-    /** A list that stores all loan records currently in the system. */
-    private static final ArrayList<Loan> loans = new ArrayList<>();
+    /** Internal in-memory storage for all loans. */
+    private static ArrayList<Loan> loans = new ArrayList<>();
 
     /**
-     * Saves a new loan record to the repository.
+     * Persists a new loan.
      *
-     * @param loan the {@link Loan} object to be saved
+     * @param loan the {@link Loan} to save
      */
     public static void save(Loan loan) {
         loans.add(loan);
     }
 
     /**
-     * Retrieves all active (non-returned) loans from the repository.
+     * Retrieves all active (non-returned) loans.
      *
-     * @return a list of active {@link Loan} objects
+     * @return list of active loans (never null)
      */
     public static List<Loan> findAllActive() {
         return loans.stream()
@@ -41,19 +43,19 @@ public class LoanRepository {
     }
 
     /**
-     * Retrieves all loans, both active and returned.
+     * Retrieves all loans (active and returned).
      *
-     * @return a list containing all {@link Loan} objects
+     * @return list of all loans (never null)
      */
     public static List<Loan> findAll() {
         return new ArrayList<>(loans);
     }
 
     /**
-     * Finds an active (non-returned) loan associated with a specific book ISBN.
+     * Finds the active loan for a specific book ISBN, if any.
      *
-     * @param isbn the ISBN of the book to search for
-     * @return the matching active {@link Loan}, or {@code null} if none exists
+     * @param isbn the book ISBN
+     * @return matching active loan, or {@code null} if none found
      */
     public static Loan findActiveByIsbn(String isbn) {
         return loans.stream()
@@ -63,10 +65,10 @@ public class LoanRepository {
     }
 
     /**
-     * Retrieves all active loans for a specific member.
+     * Finds all active (non-returned) loans for a given member.
      *
-     * @param memberId the ID of the member
-     * @return a list of active {@link Loan} objects associated with the member
+     * @param memberId the member identifier
+     * @return list of active loans for the member (never null)
      */
     public static List<Loan> findActiveByMember(String memberId) {
         return loans.stream()
@@ -75,29 +77,59 @@ public class LoanRepository {
     }
 
     /**
-     * Marks a specific loan as returned.
+     * Marks the given loan as returned.
      *
-     * @param loan the {@link Loan} object to be marked as returned
+     * @param loan the loan to update
      */
     public static void markReturned(Loan loan) {
         loan.setReturned(true);
     }
 
     /**
-     * Removes a loan record from the repository.
+     * Removes a loan from the repository.
      *
-     * @param loan the {@link Loan} object to remove
+     * @param loan the loan to remove
      */
     public static void remove(Loan loan) {
         loans.remove(loan);
     }
 
     /**
-     * Clears all loan records from the repository.
-     *
-     * <p>This operation deletes all loans (active and returned).</p>
+     * Clears all loans (useful for tests).
      */
-    public static void clear() {
+    public static void clearLoans() {
         loans.clear();
+    }
+
+    // ========================
+    // Centralized query helpers
+    // ========================
+
+    /**
+     * Finds a single active loan for the given member and ISBN.
+     *
+     * @param memberId the member identifier
+     * @param isbn     the book ISBN
+     * @return matching active loan, or {@code null} if none found
+     */
+    public static Loan findActiveByMemberAndIsbn(String memberId, String isbn) {
+        return loans.stream()
+                .filter(l -> !l.isReturned()
+                        && l.getMemberId().equals(memberId)
+                        && l.getIsbn().equals(isbn))
+                .findFirst()
+                .orElse(null);
+    }
+
+    /**
+     * Finds all active loans that are overdue as of the given date.
+     *
+     * @param today the date used to evaluate overdue status
+     * @return list of overdue active loans (never null)
+     */
+    public static List<Loan> findAllActiveOverdue(LocalDate today) {
+        return loans.stream()
+                .filter(l -> !l.isReturned() && l.isOverdue(today))
+                .collect(Collectors.toList());
     }
 }

@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import java.io.IOException;
 import java.util.List;
 
 import org.junit.jupiter.api.AfterAll;
@@ -48,13 +49,13 @@ class AdminFileLoaderTest {
 		assertFalse(existingAdmins.isEmpty(), "Admins list should not be empty");
 		
 		Admin first = existingAdmins.get(0);
-        assertEquals("Mohammad", first.getName());
+        assertEquals("Mohammad", first.getUserName());
         assertEquals("12345", first.getPassword());
 	}
 	
 	 @Test
 	    void givenMissingFile_whenLoadAdmins_thenThrowException() {
-	        Exception exception = assertThrows(Exception.class, () -> {
+	        Exception exception = assertThrows(IOException.class, () -> {
 	            notExistingFile.loadAdmins();
 	        });
 

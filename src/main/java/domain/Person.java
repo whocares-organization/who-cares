@@ -10,14 +10,23 @@ package domain;
  */
 public abstract class Person {
 
-    /** The unique identifier of the person. */
-    protected String id;
-
-    /** The full name of the person. */
-    protected String name;
+    /** The username or email used for authentication. */
+    private String userName;
 
     /** The password used for authentication. */
-    protected String password;
+    private String password;
+    
+    /** The full name of the user. */
+    private String name;
+    
+    /** The unique identifier for the user (e.g., national ID or system ID). */
+    private String id;
+    
+    /** The user's phone number. */
+    private String phone;
+    
+    /** The date when the user account was created. */
+    private String createdAt;
 
     /**
      * Default constructor that creates an empty {@code Person} object.
@@ -31,28 +40,65 @@ public abstract class Person {
      * @param name the name of the person
      * @param password the password associated with the person
      */
-    public Person(String id, String name, String password) {
-        this.id = id;
-        this.name = name;
+    public Person(String userName, String password) {
+        this.userName = userName;
         this.password = password;
     }
-
-    /**
-     * Returns the unique identifier of the person.
-     *
-     * @return the person's ID
-     */
-    public String getId() {
-        return id;
-    }
-
-    /**
-     * Sets the unique identifier of the person.
-     *
-     * @param id the person's ID
-     */
-    public void setId(String id) {
+    
+    public Person(String id,String userName, String password) {
+        this.userName = userName;
+        this.password = password;
         this.id = id;
+    }
+    
+    public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
+	}
+
+	public String getPhone() {
+		return phone;
+	}
+
+	public void setPhone(String phone) {
+		this.phone = phone;
+	}
+
+	public String getCreatedAt() {
+		return createdAt;
+	}
+
+	public void setCreatedAt(String createdAt) {
+		this.createdAt = createdAt;
+	}
+
+	/**
+     * Constructs a new User with basic information.
+     *
+     * @param userName the username or email used for login
+     * @param password the user's password
+     * @param name the full name of the user
+     * @param id the unique identifier
+     * @param phone the user's phone number
+     */
+    public Person(String userName, String password, String name, String id, String phone) {
+        this.userName = userName;
+        this.password = password;
+        this.name = name;
+        this.id = id;
+        this.phone = phone;
+        this.createdAt = java.time.LocalDate.now().toString();
     }
 
     /**
@@ -60,8 +106,8 @@ public abstract class Person {
      *
      * @return the person's name
      */
-    public String getName() {
-        return name;
+    public String getUserName() {
+        return userName;
     }
 
     /**
@@ -69,8 +115,8 @@ public abstract class Person {
      *
      * @param name the person's name
      */
-    public void setName(String name) {
-        this.name = name;
+    public void setUserName(String name) {
+        this.userName = userName;
     }
 
     /**

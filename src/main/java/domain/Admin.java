@@ -30,8 +30,12 @@ public class Admin extends Person {
      * @param name the name of the administrator
      * @param password the administrator’s login password
      */
-    public Admin(String id, String name, String password) {
-        super(id, name, password);
+    public Admin(String userName, String password) {
+        super(userName, password);
+    }
+    
+    public Admin(String userName, String password, String name, String id, String phone) {
+       super(userName, password, name, id, phone);
     }
 
     /**
@@ -61,8 +65,7 @@ public class Admin extends Person {
     @Override
     public String toString() {
         return "Admin{" +
-                "id='" + id + '\'' +
-                ", name='" + name + '\'' +
+                ", name='" + this.getName() + '\'' +
                 ", status=" + status +
                 '}';
     }
