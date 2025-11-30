@@ -4,7 +4,7 @@ package domain;
  * Represents the operational status of an administrator in the library system.
  * Tracks whether an administrator is currently active and available for administrative tasks.
  */
-public enum AdminStatus {
+public enum UserStatus {
 
     /**
      * Administrator is currently logged in and active.

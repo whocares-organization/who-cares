@@ -10,22 +10,20 @@ import org.junit.jupiter.api.Test;
 
 class PersonTest {
 
-	@BeforeAll
-	static void setUpBeforeClass() throws Exception {
-	}
+    @BeforeAll
+    static void setUpBeforeClass() throws Exception {}
 
-	@AfterAll
-	static void tearDownAfterClass() throws Exception {
-	}
+    @AfterAll
+    static void tearDownAfterClass() throws Exception {}
 
-	@BeforeEach
-	void setUp() throws Exception {
-	}
+    @BeforeEach
+    void setUp() throws Exception {}
 
-	@AfterEach
-	void tearDown() throws Exception {
-	}
+    @AfterEach
+    void tearDown() throws Exception {}
 
-	
-
+    @Test
+    void placeholder() {
+        assertTrue(true);
+    }
 }

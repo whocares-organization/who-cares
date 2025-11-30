@@ -23,6 +23,14 @@ public class LoanRepository {
     private static ArrayList<Loan> loans = new ArrayList<>();
 
     /**
+     * Creates a new {@code LoanRepository} instance.
+     *
+     * <p>Note: This class primarily uses static storage; the instance is provided
+     * for APIs that prefer injection.</p>
+     */
+    public LoanRepository() { }
+
+    /**
      * Persists a new loan.
      *
      * @param loan the {@link Loan} to save
@@ -130,6 +138,23 @@ public class LoanRepository {
     public static List<Loan> findAllActiveOverdue(LocalDate today) {
         return loans.stream()
                 .filter(l -> !l.isReturned() && l.isOverdue(today))
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Instance-level query for tests and services that prefer injected repositories.
+     * Returns active (non-returned) overdue loans for a specific member as of the given date.
+     *
+     * @param memberId the member identifier whose loans will be inspected
+     * @param today    the reference date used to determine whether a loan is overdue
+     * @return a list of the member's active overdue loans as of {@code today} (never null)
+     */
+    public List<Loan> findActiveOverdueByMember(String memberId, LocalDate today) {
+        return loans.stream()
+                .filter(l -> !l.isReturned()
+                        && memberId != null
+                        && memberId.equals(l.getMemberId())
+                        && l.isOverdue(today))
                 .collect(Collectors.toList());
     }
 }

@@ -12,32 +12,52 @@ public class Member extends Person {
     private double fineBalance;
 
     /**
-     * Constructs a new {@code Member} with the specified ID, name, and password.
+     * Constructs a new {@code Member} with the specified username and password.
      * The fine balance is initialized to zero.
      *
-     * @param id the unique ID of the member
-     * @param name the member's full name
+     * @param userName the username used for authentication
      * @param password the password used for authentication
      */
     public Member(String userName, String password) {
         super(userName, password);
         this.fineBalance = 0.0;
     }
-    
-    public Member(String id, String userName, String password) {
-        super(id, userName, password);
-        this.fineBalance = 0.0;
-    }
-    
+
     /** Default Constructor. */
     public Member() {
-    	
+        
     }
-    
+
+    /**
+     * Constructs a new {@code Member} with detailed profile information.
+     * The fine balance is initialized to zero.
+     *
+     * @param userName the username used for authentication
+     * @param password the password used for authentication
+     * @param name     the member's full name
+     * @param id       the unique ID of the member
+     * @param phone    the member's phone number
+     */
     public Member(String userName, String password, String name, String id, String phone) {
         super(userName, password, name, id, phone);
         this.fineBalance = 0.0;
      }
+
+    /**
+     * Constructs a new {@code Member} using an ID as the name and an email for login.
+     * The fine balance is initialized to zero.
+     *
+     * @param id      the unique ID of the member (also set as the display name)
+     * @param email   the email used for authentication
+     * @param password the password used for authentication
+     */
+    public Member(String id, String email, String password) {
+        super(email, password);
+        this.setName(id);
+        this.fineBalance = 0.0;
+        this.setId(id);
+    }
+
 
     /**
      * Returns the current fine balance of the member.
@@ -48,20 +68,25 @@ public class Member extends Person {
         return fineBalance;
     }
 
+    /**
+     * Sets the fine balance for the member.
+     *
+     * @param fineBalance the new fine balance to set
+     */
     public void setFineBalance(double fineBalance) {
-		this.fineBalance = fineBalance;
-	}
+        this.fineBalance = fineBalance;
+    }
 
     /**
      * Adds a fine amount to the member's account.
      *
      * @param amount the amount to add to the fine balance
      */
-	public void addMemberFine(double amount) { 
-		fineBalance = fineBalance + amount;
-	}
+    public void addMemberFine(double amount) { 
+        fineBalance = fineBalance + amount;
+    }
     
-	/**
+    /**
      * Pays part or all of the member's outstanding fines.
      *
      * <p>If the payment amount exceeds the current fine balance,
@@ -70,19 +95,19 @@ public class Member extends Person {
      * @param amount the amount to pay toward the fine (must be positive)
      * @throws IllegalArgumentException if the amount is non-positive
      */
-	public void payMemberFine(double amount) {
-	    if (amount <= 0) {
-	        throw new IllegalArgumentException("Payment amount must be positive.");
-	    }
+    public void payMemberFine(double amount) {
+        if (amount <= 0) {
+            throw new IllegalArgumentException("Payment amount must be positive.");
+        }
 
-	    double currentBalance = fineBalance;
+        double currentBalance = fineBalance;
 
-	    if (amount >= currentBalance) {
-	    	fineBalance = 0.0;
-	    } else {
-	    	fineBalance = currentBalance - amount;
-	    }
-	}
+        if (amount >= currentBalance) {
+            fineBalance = 0.0;
+        } else {
+            fineBalance = currentBalance - amount;
+        }
+    }
     
     /**
      * Determines whether the member is eligible to borrow books.
@@ -105,6 +130,28 @@ public class Member extends Person {
         return "Member{" +
                 ", name='" + this.getName() + '\'' +
                 ", fineBalance=" + fineBalance +
+                ", status=" + this.getStatus() +
                 '}';
+    }
+    
+    /**
+     * Calculates the total fines across the provided loans for this member as of the given date.
+     * Only considers this member's non-returned loans; each loan's fine is recalculated based on today.
+     *
+     * @param loans an iterable collection of loans to inspect (may be {@code null})
+     * @param today the date used to calculate fines
+     * @return the sum of fine amounts for this member's active loans
+     */
+    public double calculateTotalFines(Iterable<Loan> loans, java.time.LocalDate today) {
+        if (loans == null) return 0.0;
+        double total = 0.0;
+        String myId = getId();
+        for (Loan loan : loans) {
+            if (loan != null && !loan.isReturned() && myId != null && myId.equals(loan.getMemberId())) {
+                loan.calculateFine(today);
+                total += loan.getFineAmount();
+            }
+        }
+        return total;
     }
 }

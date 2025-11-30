@@ -9,7 +9,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import domain.Admin;
-import domain.AdminStatus;
+import domain.UserStatus;
 
 class AdminTest {
 
@@ -49,16 +49,16 @@ class AdminTest {
 
     @Test
     void testSetAndGetStatus() {
-        admin.setStatus(AdminStatus.ONLINE);
-        assertEquals(AdminStatus.ONLINE, admin.getStatus());
+        admin.setStatus(UserStatus.ONLINE);
+        assertEquals(UserStatus.ONLINE, admin.getStatus());
 
-        admin.setStatus(AdminStatus.OFFLINE);
-        assertEquals(AdminStatus.OFFLINE, admin.getStatus());
+        admin.setStatus(UserStatus.OFFLINE);
+        assertEquals(UserStatus.OFFLINE, admin.getStatus());
     }
 
     @Test
     void testToStringContainsNameAndStatus() {
-        admin.setStatus(AdminStatus.ONLINE);
+        admin.setStatus(UserStatus.ONLINE);
         String result = admin.toString();
         assertTrue(result.contains("Admin"));
         assertTrue(result.contains("ONLINE"));

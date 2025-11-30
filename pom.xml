@@ -1,16 +1,55 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" 
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
-                             https://maven.apache.org/xsd/maven-4.0.0.xsd">
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
   <modelVersion>4.0.0</modelVersion>
   <groupId>library.najah.edu</groupId>
   <artifactId>library-management-system</artifactId>
   <version>0.0.1-SNAPSHOT</version>
-  
+
+  <!-- ======================== -->
+  <!--        PROPERTIES        -->
+  <!-- ======================== -->
+  <properties>
+    <maven.compiler.source>17</maven.compiler.source>
+    <maven.compiler.target>17</maven.compiler.target>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <javafx.version>21.0.4</javafx.version>
+  </properties>
+
+  <!-- ======================== -->
+  <!--   JUNIT VERSION CONTROL  -->
+  <!-- ======================== -->
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.junit</groupId>
+        <artifactId>junit-bom</artifactId>
+        <version>5.10.2</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <!-- ======================== -->
+  <!--         BUILD            -->
+  <!-- ======================== -->
   <build>
     <plugins>
 
-      <!-- 1) Checkstyle -->
+      <!-- Java Compiler -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.11.0</version>
+        <configuration>
+          <source>${maven.compiler.source}</source>
+          <target>${maven.compiler.target}</target>
+        </configuration>
+      </plugin>
+
+      <!-- Checkstyle -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-checkstyle-plugin</artifactId>
@@ -31,7 +70,7 @@
         </configuration>
       </plugin>
 
-      
+      <!-- PMD -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-pmd-plugin</artifactId>
@@ -42,15 +81,13 @@
             <phase>verify</phase>
             <goals>
               <goal>pmd</goal>
-              <goal>cpd-check</goal> 
+              <goal>cpd-check</goal>
             </goals>
           </execution>
         </executions>
         <configuration>
           <format>xml</format>
           <targetDirectory>${project.build.directory}</targetDirectory>
-
-          
           <rulesets>
             <ruleset>category/java/bestpractices.xml</ruleset>
             <ruleset>category/java/codestyle.xml</ruleset>
@@ -61,14 +98,12 @@
             <ruleset>category/java/performance.xml</ruleset>
             <ruleset>category/java/security.xml</ruleset>
           </rulesets>
-
           <failOnViolation>false</failOnViolation>
           <includeTests>true</includeTests>
-          <printFailingErrors>true</printFailingErrors>
         </configuration>
       </plugin>
 
-      <!-- 3) Violations Plugin -->
+      <!-- Violations Plugin -->
       <plugin>
         <groupId>se.bjurr.violations</groupId>
         <artifactId>violations-maven-plugin</artifactId>
@@ -85,54 +120,128 @@
         <configuration>
           <checkstyleEnabled>true</checkstyleEnabled>
           <pmdEnabled>true</pmdEnabled>
-          <!-- <failBuildOnViolations>false</failBuildOnViolations> -->
         </configuration>
       </plugin>
-      
+
+      <!-- TEST RUNNER (IMPORTANT) -->
       <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-surefire-plugin</artifactId>
-            <version>3.1.2</version>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>3.1.2</version>
+        <configuration>
+          <useModulePath>false</useModulePath>
+          <argLine>--add-opens java.base/java.lang=ALL-UNNAMED</argLine>
+        </configuration>
+      </plugin>
+
+      <!-- JavaFX Runtime -->
+      <plugin>
+        <groupId>org.openjfx</groupId>
+        <artifactId>javafx-maven-plugin</artifactId>
+        <version>0.0.8</version>
+        <configuration>
+          <mainClass>presentation.MainApp</mainClass>
+          <launcher>launch</launcher>
+          <jlinkZip>false</jlinkZip>
+        </configuration>
+      </plugin>
+
+      <!-- JaCoCo Coverage -->
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <version>0.8.12</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>prepare-agent</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>report</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>report</goal>
+            </goals>
             <configuration>
-                <argLine>
-                    --add-opens java.base/java.lang=ALL-UNNAMED
-                </argLine>
+              <excludes>
+                <!-- Exclude Presentation Layer from Coverage -->
+                 
+                    <exclude>presentation/**</exclude>
+                    <exclude>**/presentation/**</exclude>
+                    <exclude>src/main/java/presentation/**</exclude>
+              </excludes>
             </configuration>
-        </plugin>
+          </execution>
+        </executions>
+      </plugin>
 
     </plugins>
   </build>
-  
+
+  <!-- ======================== -->
+  <!--       DEPENDENCIES       -->
+  <!-- ======================== -->
   <dependencies>
-  <!-- https://mvnrepository.com/artifact/org.mockito/mockito-core -->
-<dependency>
-    <groupId>org.mockito</groupId>
-    <artifactId>mockito-core</artifactId>
-    <version>5.20.0</version>
-    <scope>test</scope>
-</dependency>
 
-<!-- https://mvnrepository.com/artifact/org.mockito/mockito-inline -->
-<dependency>
-    <groupId>org.mockito</groupId>
-    <artifactId>mockito-inline</artifactId>
-    <version>5.2.0</version>
-    <scope>test</scope>
-</dependency>
+    <!-- Mockito Core -->
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-core</artifactId>
+      <version>5.20.0</version>
+      <scope>test</scope>
+    </dependency>
 
-<!-- https://mvnrepository.com/artifact/org.mockito/mockito-junit-jupiter -->
-<dependency>
-    <groupId>org.mockito</groupId>
-    <artifactId>mockito-junit-jupiter</artifactId>
-    <version>5.20.0</version>
-    <scope>test</scope>
-</dependency>
+    <!-- Mockito Inline -->
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-inline</artifactId>
+      <version>5.2.0</version>
+      <scope>test</scope>
+    </dependency>
 
-<dependency>
-    <groupId>org.junit.jupiter</groupId>
-    <artifactId>junit-jupiter</artifactId>
-    <version>5.10.2</version>
-    <scope>test</scope>
-</dependency>
+    <!-- Mockito JUnit Jupiter -->
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-junit-jupiter</artifactId>
+      <version>5.2.0</version>
+      <scope>test</scope>
+    </dependency>
+
+    <!-- JUnit Jupiter (version controlled by BOM) -->
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <!-- Java Mail -->
+    <dependency>
+      <groupId>com.sun.mail</groupId>
+      <artifactId>jakarta.mail</artifactId>
+      <version>2.0.2</version>
+    </dependency>
+
+    <!-- dotenv -->
+    <dependency>
+      <groupId>io.github.cdimascio</groupId>
+      <artifactId>dotenv-java</artifactId>
+      <version>3.2.0</version>
+    </dependency>
+
+    <!-- JavaFX -->
+    <dependency>
+      <groupId>org.openjfx</groupId>
+      <artifactId>javafx-controls</artifactId>
+      <version>${javafx.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.openjfx</groupId>
+      <artifactId>javafx-fxml</artifactId>
+      <version>${javafx.version}</version>
+    </dependency>
+
   </dependencies>
+
 </project>

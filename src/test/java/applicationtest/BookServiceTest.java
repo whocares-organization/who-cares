@@ -2,11 +2,16 @@ package applicationtest;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.util.List;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
 import application.BookService;
+import applicationsearchbooks.BookAuthorSearchStrategy;
+import applicationsearchbooks.BookIsbnSearchStrategy;
+import applicationsearchbooks.BookSearchStrategy;
+import applicationsearchbooks.BookTitleSearchStrategy;
 import persistence.BookRepository;
 import domain.Book;
 
@@ -99,6 +104,69 @@ class BookServiceTest {
         Book result = bookService.searchBooks("NonExisting");
         assertNull(result, "Searching for a non-existing keyword should return null");
     }
+    
+    //===================== Test A Strategy Pattern For Searching Books ========================
+    // ======================= Title Search =======================
+    @Test
+    void whenSearchByExistingTitle_thenReturnMatchingBook() {
+        BookSearchStrategy strategy = new BookTitleSearchStrategy();
+        bookService.getRepository().setSearchStrategy(strategy);
+        List<Book> result = bookService.search("Olds");
+
+        assertEquals(1, result.size());
+        assertEquals("Olds", result.get(0).getTitle());
+    }
+
+    @Test
+    void whenSearchByNonExistingTitle_thenReturnEmptyList() {
+        BookSearchStrategy strategy = new BookTitleSearchStrategy();
+        bookService.getRepository().setSearchStrategy(strategy);
+        List<Book> result = bookService.search("NonExistingTitle");
+
+        assertTrue(result.isEmpty(), "Should return empty list if title not found");
+    }
+
+    // ======================= Author Search =======================
+    @Test
+    void whenSearchByExistingAuthor_thenReturnMatchingBook() {
+        BookSearchStrategy strategy = new BookAuthorSearchStrategy();
+        bookService.getRepository().setSearchStrategy(strategy);
+        List<Book> result = bookService.search("Majd");
+
+        assertEquals(1, result.size());
+        assertEquals("Majd", result.get(0).getAuthor());
+    }
+
+    @Test
+    void whenSearchByNonExistingAuthor_thenReturnEmptyList() {
+        BookSearchStrategy strategy = new BookAuthorSearchStrategy();
+        bookService.getRepository().setSearchStrategy(strategy);
+        List<Book> result = bookService.search("NonExistingAuthor");
+
+        assertTrue(result.isEmpty(), "Should return empty list if author not found");
+    }
+
+    // ======================= ISBN Search =======================
+    @Test
+    void whenSearchByExistingIsbn_thenReturnMatchingBook() {
+        BookSearchStrategy strategy = new BookIsbnSearchStrategy();
+        bookService.getRepository().setSearchStrategy(strategy);
+        List<Book> result = bookService.search("12345");
+
+        assertEquals(1, result.size());
+        assertEquals("12345", result.get(0).getIsbn());
+    }
+
+    @Test
+    void whenSearchByNonExistingIsbn_thenReturnEmptyList() {
+        BookSearchStrategy strategy = new BookIsbnSearchStrategy();
+        bookService.getRepository().setSearchStrategy(strategy);
+        List<Book> result = bookService.search("999");
+
+        assertTrue(result.isEmpty(), "Should return empty list if ISBN not found");
+    }
+  //===================== Test A Strategy Pattern For Searching Books ========================
+
 
     // ================= Remove Book Tests =================
     @Test
@@ -129,5 +197,6 @@ class BookServiceTest {
         assertNull(bookService.searchBooks("12345"), "Book should no longer exist in repository");
     }
     // =====================================================
+    
 
 }
