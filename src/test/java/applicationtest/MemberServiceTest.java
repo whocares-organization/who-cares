@@ -1,7 +1,9 @@
 package applicationtest;
 
 import application.MemberService;
+import domain.Admin;
 import domain.Member;
+import domain.UserStatus;
 import persistence.MemberRepository;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -166,19 +168,33 @@ class MemberServiceTest {
     @Test
     void logoutWithEmptyUsername_ShouldReturnFalse() {
         Boolean result = memberService.logout("");
-        assertFalse(result, "Logout should fail for empty username");
+        assertNull(result, "Logout should fail for empty username");
     }
 
     @Test
     void logoutWithNullUsername_ShouldReturnFalse() {
         Boolean result = memberService.logout(null);
-        assertFalse(result, "Logout should fail for null username");
+        assertNull(result, "Logout should fail for null username");
+    }
+
+   
+    
+    @Test
+    void logoutOfflineUser_ShouldFail() {
+        Member member = memberService.findMemberByEmail("Ali");
+        member.setStatus(UserStatus.OFFLINE);
+        Boolean result = memberService.logout("Ali");
+        assertFalse(result, "Logout should fail for offline user");
+        assertEquals(UserStatus.OFFLINE, member.getStatus(), "Admin status should remain OFFLINE");
     }
 
     @Test
-    void logoutExistingMember_ShouldSucceed() {
+    void logoutOnlineUser_ShouldSucceed() {
+    	Member member = memberService.findMemberByEmail("Ali");
+    	member.setStatus(UserStatus.ONLINE);
         Boolean result = memberService.logout("Ali");
-        assertTrue(result, "Logout should succeed for existing member");
+        assertTrue(result, "Logout should succeed for online user");
+        assertEquals(UserStatus.OFFLINE, member.getStatus(), "Admin status should become OFFLINE");
     }
     // =================================================
 }

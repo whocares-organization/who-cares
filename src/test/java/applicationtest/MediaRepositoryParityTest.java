@@ -3,7 +3,7 @@ package applicationtest;
 import application.AdminActions;
 import application.AdminFileLoader;
 import domain.Admin;
-import domain.AdminStatus;
+import domain.UserStatus;
 import domain.Book;
 import domain.CD;
 import domain.Loan;
@@ -38,7 +38,7 @@ class MediaRepositoryParityTest {
         actions = new AdminActions();
         admin = new AdminFileLoader("admins.txt").loadAdmins().get(0);
         AdminRepository.addAdmin(admin);
-        admin.setStatus(AdminStatus.ONLINE);
+        admin.setStatus(UserStatus.ONLINE);
     }
 
     @Test

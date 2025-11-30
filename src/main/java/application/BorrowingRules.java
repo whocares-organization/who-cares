@@ -8,32 +8,40 @@ import java.time.LocalDate;
 import java.util.List;
 
 /**
- * Encapsulates business rules governing whether a member may borrow a new book.
- * Pure domain/service logic: no email, no UI.
+ * Encapsulates borrowing eligibility rules for library members.
+ *
+ * <p>Currently enforces basic constraints such as outstanding fines
+ * or other application-specific checks before borrowing is permitted.</p>
  */
 public class BorrowingRules {
 
     /**
+     * Creates a new instance of {@code BorrowingRules} with default policy.
+     */
+    public BorrowingRules() { }
+
+    /**
      * Determines whether a member can borrow:
-     *  - Member must have no unpaid fines (member.canBorrow() == true)
-     *  - Member must not have any overdue active loans
-     *
+     *  <ul>
+     *    <li>Member must have no unpaid fines (member.canBorrow() == true)</li>
+     *    <li>Member must not have any overdue active loans</li>
+     *  </ul>
      * @param member the member attempting to borrow
      * @param loanRepository repository to inspect active overdue loans
      * @return true if borrowing is allowed, false otherwise
      */
     public boolean canBorrow(Member member, LoanRepository loanRepository) {
         if (member == null) return false;
-        if (!member.canBorrow()) return false; // unpaid fines present
+        if (!member.canBorrow()) return false;
         List<Loan> overdue = loanRepository.findActiveOverdueByMember(member.getUserName(), LocalDate.now());
         return overdue.isEmpty();
     }
 
     /**
      * Ensures a member can borrow or throws an IllegalStateException with a specific reason.
-     *
      * @param member the member attempting to borrow
      * @param loanRepository repository to inspect overdue loans
+     * @throws IllegalStateException if member is null, has fines, or has overdue loans
      */
     public void ensureCanBorrow(Member member, LoanRepository loanRepository) {
         if (member == null) {

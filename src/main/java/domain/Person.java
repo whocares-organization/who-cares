@@ -27,64 +27,101 @@ public abstract class Person {
     
     /** The date when the user account was created. */
     private String createdAt;
+    
+    private UserStatus status;
 
     /**
-     * Default constructor that creates an empty {@code Person} object.
+     * Returns the current status of the user.
+     * @return the status value
+     */
+    public UserStatus getStatus() { return status; }
+
+    /**
+     * Updates the current status of the user.
+     * @param status the new status to set
+     */
+    public void setStatus(UserStatus status) { this.status = status; }
+
+    /**
+     * Default no-argument constructor.
+     * Initializes an empty {@code Person} instance.
      */
     public Person() {}
 
     /**
-     * Constructs a new {@code Person} with the specified details.
+     * Constructs a new {@code Person} with the specified username and password.
      *
-     * @param id the unique identifier for the person
-     * @param name the name of the person
-     * @param password the password associated with the person
+     * @param userName the username or email used for login
+     * @param password the user's password
      */
     public Person(String userName, String password) {
         this.userName = userName;
         this.password = password;
     }
     
-    public Person(String id,String userName, String password) {
+    /**
+     * Constructs a new {@code Person} with an explicit ID, username, and password.
+     *
+     * @param id the unique identifier for the person
+     * @param userName the username or email used for login
+     * @param password the password associated with the person
+     */
+    public Person(String id, String userName, String password) {
         this.userName = userName;
         this.password = password;
         this.id = id;
     }
     
-    public String getName() {
-		return name;
-	}
+    /**
+     * Returns the full name of the user.
+     * @return the name value
+     */
+    public String getName() { return name; }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    /**
+     * Updates the full name of the user.
+     * @param name the new name to set
+     */
+    public void setName(String name) { this.name = name; }
 
-	public String getId() {
-		return id;
-	}
+    /**
+     * Returns the unique identifier of the user.
+     * @return the ID value
+     */
+    public String getId() { return id; }
 
-	public void setId(String id) {
-		this.id = id;
-	}
+    /**
+     * Updates the unique identifier of the user.
+     * @param id the new identifier to set
+     */
+    public void setId(String id) { this.id = id; }
 
-	public String getPhone() {
-		return phone;
-	}
+    /**
+     * Returns the user's phone number.
+     * @return the phone value
+     */
+    public String getPhone() { return phone; }
 
-	public void setPhone(String phone) {
-		this.phone = phone;
-	}
+    /**
+     * Updates the user's phone number.
+     * @param phone the new phone value to set
+     */
+    public void setPhone(String phone) { this.phone = phone; }
 
-	public String getCreatedAt() {
-		return createdAt;
-	}
+    /**
+     * Returns the account creation date.
+     * @return the creation date string
+     */
+    public String getCreatedAt() { return createdAt; }
 
-	public void setCreatedAt(String createdAt) {
-		this.createdAt = createdAt;
-	}
+    /**
+     * Updates the account creation date.
+     * @param createdAt the creation date string to set
+     */
+    public void setCreatedAt(String createdAt) { this.createdAt = createdAt; }
 
-	/**
-     * Constructs a new User with basic information.
+    /**
+     * Constructs a new user with basic information.
      *
      * @param userName the username or email used for login
      * @param password the user's password
@@ -102,40 +139,28 @@ public abstract class Person {
     }
 
     /**
-     * Returns the name of the person.
-     *
-     * @return the person's name
+     * Returns the username or email used for login.
+     * @return the username value
      */
-    public String getUserName() {
-        return userName;
-    }
+    public String getUserName() { return userName; }
 
     /**
-     * Sets the name of the person.
-     *
-     * @param name the person's name
+     * Updates the username or email used for login.
+     * @param userName the new username to set
      */
-    public void setUserName(String name) {
-        this.userName = userName;
-    }
+    public void setUserName(String userName) { this.userName = userName; }
 
     /**
-     * Returns the password of the person.
-     *
-     * @return the person's password
+     * Returns the password associated with the user.
+     * @return the password value
      */
-    public String getPassword() {
-        return password;
-    }
+    public String getPassword() { return password; }
 
     /**
-     * Updates the password of the person.
-     *
+     * Updates the password of the user.
      * @param password the new password to set
      */
-    public void setPassword(String password) {
-        this.password = password;
-    }
+    public void setPassword(String password) { this.password = password; }
 
     /**
      * Verifies whether the provided password matches the stored one.

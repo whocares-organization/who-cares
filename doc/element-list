@@ -1,4 +1,8 @@
 application
+applicationsearchbooks
+applicationsearchtest
+applicationtest
 domain
+domaintest
 persistence
 presentation

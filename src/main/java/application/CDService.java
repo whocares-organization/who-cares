@@ -13,9 +13,7 @@ import java.util.logging.Logger;
  * Application layer service for Compact Discs (CD) handling borrow/return operations
  * and overdue fine calculation. This class focuses ONLY on CD business rules:
  *
- *  Borrow period: 7 days.
- *  Overdue fine: 20 NIS per day (applied once the due date has passed).
- *
+ * <p>Borrow period: 7 days.<br>Overdue fine: 20 NIS per day (applied once the due date has passed).</p>
  * It delegates persistence concerns to {@link CDRepository} and {@link LoanRepository}.
  */
 public class CDService {
@@ -23,18 +21,21 @@ public class CDService {
     private static final Logger LOGGER = Logger.getLogger(CDService.class.getName());
 
     /**
+     * Creates a new {@code CDService} instance.
+     */
+    public CDService() { }
+
+    /**
      * Borrows a CD by its id for the given member starting on borrowDate.
      * Creates and stores a {@link Loan} instance bound to the CD and member.
-     *
-     * @param member      the borrowing member (must not be null and must be allowed to borrow)
-     * @param cdId        the CD identifier (must exist in repository)
-     * @param borrowDate  the start date of borrowing
+     * @param member the borrowing member (must not be null and must be allowed to borrow)
+     * @param cdId the CD identifier (must exist in repository)
+     * @param borrowDate the start date of borrowing
      * @return the created Loan object
      * @throws IllegalArgumentException if arguments are null or CD does not exist
-     * @throws IllegalStateException    if member cannot borrow or CD already borrowed
+     * @throws IllegalStateException if member cannot borrow or CD already borrowed
      */
     public Loan borrowCD(Member member, String cdId, LocalDate borrowDate) {
-        // streamlined validation
         if (member == null) throw new IllegalArgumentException("Member is required.");
         if (cdId == null || cdId.isBlank()) throw new IllegalArgumentException("CD id is required.");
         if (borrowDate == null) throw new IllegalArgumentException("Borrow date is required.");
@@ -42,7 +43,6 @@ public class CDService {
         CD cd = CDRepository.findById(cdId);
         if (cd == null) throw new IllegalArgumentException("CD not found: " + cdId);
         if (cd.isBorrowed()) throw new IllegalStateException("CD is already borrowed.");
-        // Enforce borrowing rules (unpaid fines or overdue loans)
         new BorrowingRules().ensureCanBorrow(member, new LoanRepository());
 
         Loan loan = new Loan(cd, member.getUserName(), borrowDate);
@@ -53,9 +53,8 @@ public class CDService {
 
     /**
      * Returns a previously borrowed CD, computing any overdue fine at the given returnDate.
-     *
-     * @param member     the member returning the CD
-     * @param cdId       identifier of the CD to return
+     * @param member the member returning the CD
+     * @param cdId identifier of the CD to return
      * @param returnDate the date the CD is being returned
      * @return the calculated fine (0 if not overdue)
      * @throws IllegalArgumentException if arguments are null or active loan not found
@@ -80,7 +79,7 @@ public class CDService {
     /**
      * Retrieves the active (non-returned) loan for a given member and CD id.
      * @param member the member
-     * @param cdId   the cd identifier
+     * @param cdId the cd identifier
      * @return active loan or null if none
      */
     public Loan getActiveLoan(Member member, String cdId) {
@@ -91,7 +90,9 @@ public class CDService {
     /**
      * Computes the potential overdue fine for a currently active CD loan as of 'today'
      * WITHOUT marking it returned.
-     *
+     * @param member the member owning the loan
+     * @param cdId cd identifier
+     * @param today evaluation date
      * @return fine amount or 0.0 if no active loan or not overdue
      */
     public double previewFine(Member member, String cdId, LocalDate today) {

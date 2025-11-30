@@ -14,16 +14,18 @@ import persistence.BookRepository;
  *
  * <p>Acts as an intermediary between the presentation layer and the BookRepository.
  * Provides operations to add new books and search for existing books by keyword.
- * This class keeps the business logic decoupled from the persistence mechanism.
+ * This class keeps the business logic decoupled from the persistence mechanism.</p>
  */
 public class BookService {
-	 private static final Logger LOGGER = Logger.getLogger(AdminFileLoader.class.getName());
+	 private static final Logger LOGGER = Logger.getLogger(BookService.class.getName());
 
 	 private BookRepository repository;
 
   /**
-   * Default constructor.
-   * Repository must be set via dependency injection or a setter before usage.
+   * Creates a BookService with no repository configured.
+   *
+   * <p>Use {@link #setRepository(BookRepository)} or the {@link #BookService(BookRepository)}
+   * constructor to supply the repository before invoking other methods.</p>
    */
   public BookService() {
 	 
@@ -32,16 +34,19 @@ public class BookService {
   /**
    * Constructs a BookService with the specified repository.
    *
-   * @param repository the BookRepository instance to use for storage and retrieval
+   * @param repository the BookRepository instance to use for storage and retrieval (may be null)
    */
   public BookService(BookRepository repository) {
     this.repository = repository;
   }
 
   /**
-   * Adds a new book to the repository.
+   * Adds a new book to the repository after validating its required fields.
    *
-   * @param book the Book object to add
+   * @param book the Book object to add (validated for non-null title, author, and ISBN)
+   * @return {@code true} if the book was added;
+   *         {@code false} if a book with the same ISBN already exists or validation fails;
+   *         {@code null} if the provided book is {@code null}
    */
   public Boolean addBook(Book book) {
 	  
@@ -77,6 +82,14 @@ public class BookService {
     return true;
   }
   
+  /**
+   * Removes an existing book from the repository.
+   *
+   * @param book the Book to remove (its ISBN is validated)
+   * @return {@code true} if the book was removed;
+   *         {@code false} if the book does not exist or validation fails;
+   *         {@code null} if the provided book is {@code null}
+   */
   public Boolean removeBook(Book book) {
       if (book == null) {
           LOGGER.warning("Cannot remove book: book is null");
@@ -100,19 +113,29 @@ public class BookService {
       return true;
   }
 
+  /**
+   * Returns the configured repository instance.
+   *
+   * @return the current BookRepository (may be null if not yet configured)
+   */
   public BookRepository getRepository() {
 	return repository;
 }
 
+  /**
+   * Sets the repository used by this service.
+   *
+   * @param repository the BookRepository to use (must not be null to use search operations)
+   */
   public void setRepository(BookRepository repository) {
 	this.repository = repository;
   }
 
   /**
-   * Searches for books matching the given keyword in the title, author, or ISBN.
+   * Searches for the first book matching the given keyword in the title, author, or ISBN.
    *
    * @param keyword the keyword to search for
-   * @return a list of books matching the keyword; empty list if none found
+   * @return the first matching book, or {@code null} if no match is found
    */
   public Book searchBooks(String keyword) {
     return repository.searchBook(keyword);
@@ -131,6 +154,25 @@ public class BookService {
   public List<Book> search(String keyword){
 	  return repository.search(keyword);
   }
+  
+  /**
+   * Counts the total number of books tracked by the repository.
+   *
+   * @return the number of books currently stored
+   */
+  public int countBooks() {
+	    return repository.findAll().size();
+	}
+
+	/**
+	 * Returns a snapshot of all books in the repository.
+	 *
+	 * @return list of all books (never null)
+	 */
+	public List<Book> getAllBooks() {
+	    return repository.findAll();
+	}
+
   
   //=================worked by montaser===========================//////////
   
@@ -194,5 +236,3 @@ public class BookService {
   
   */
 }
-
-

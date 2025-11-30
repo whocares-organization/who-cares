@@ -1,17 +1,36 @@
 package application;
 
-import jakarta.mail.*;
-import jakarta.mail.internet.*;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import io.github.cdimascio.dotenv.Dotenv;
 
+import io.github.cdimascio.dotenv.Dotenv;
+import jakarta.mail.Authenticator;
+import jakarta.mail.Message;
+import jakarta.mail.MessagingException;
+import jakarta.mail.PasswordAuthentication;
+import jakarta.mail.Session;
+import jakarta.mail.Transport;
+import jakarta.mail.internet.InternetAddress;
+import jakarta.mail.internet.MimeMessage;
+
+/**
+ * Utility implementation of {@link EmailService} that sends real emails via SMTP.
+ *
+ * <p>Credentials can be supplied via constructor parameters or environment variables
+ * (e.g., using dotenv), depending on the runtime configuration.</p>
+ */
 public class SendRealEmail implements EmailService {
     private final Session session;
     private final String from;
     private final Logger logger = Logger.getLogger(SendRealEmail.class.getName());
 
+    /**
+     * Creates an email sender with the given credentials.
+     *
+     * @param username the SMTP account username
+     * @param password the SMTP account password
+     */
     public SendRealEmail(String username, String password) {
         if (username == null || password == null) {
             throw new IllegalArgumentException("Email username or password cannot be null.");
@@ -33,13 +52,21 @@ public class SendRealEmail implements EmailService {
         });
     }
 
+    /**
+     * Sends an email with the specified subject and body to the given recipient.
+     *
+     * @param to      the recipient's email address
+     * @param subject the subject of the email
+     * @param body    the body of the email
+     */
     @Override
     public void sendEmail(String to, String subject, String body) {
-        try {
-            if (to == null || to.isBlank()) {
-                throw new IllegalArgumentException("Recipient email address (to) cannot be null or empty.");
-            }
+        // Validate inputs and propagate IllegalArgumentException directly as the tests expect.
+        if (to == null || to.isBlank()) {
+            throw new IllegalArgumentException("Recipient email address (to) cannot be null or empty.");
+        }
 
+        try {
             Message msg = new MimeMessage(session);
             msg.setFrom(new InternetAddress(from));
             msg.setRecipients(Message.RecipientType.TO, InternetAddress.parse(to, false));
@@ -47,13 +74,16 @@ public class SendRealEmail implements EmailService {
             msg.setText(body != null ? body : "");
             Transport.send(msg);
             logger.info("✅ Email sent successfully to " + to);
-        } catch (MessagingException | IllegalArgumentException e) {
+        } catch (MessagingException e) {
+            // Wrap MessagingException as RuntimeException, preserving the cause for testing.
             logger.log(Level.SEVERE, "❌ Error sending email to " + to, e);
             throw new RuntimeException(e);
         }
     }
 
-   
+    /**
+     * Executes a demo routine for sending a test email.
+     */
     public static void run() {
         Dotenv dotenv = Dotenv.load();
         String username = dotenv.get("EMAIL_USERNAME");
@@ -69,11 +99,16 @@ public class SendRealEmail implements EmailService {
         String subject = "Book Due Reminder";
         String body = "Dear user, Your book is due soon. Best regards, An Najah Library System";
 
-      
+        
         String recipient = "s12218103@stu.najah.edu";
         emailService.sendEmail(recipient, subject, body);
     }
 
+    /**
+     * CLI entry point for sending a test email.
+     *
+     * @param args command-line arguments (unused)
+     */
     public static void main(String[] args) {
         run();
     }

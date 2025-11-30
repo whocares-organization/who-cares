@@ -3,7 +3,7 @@ package applicationtest;
 import application.AdminFileLoader;
 import application.AdminService;
 import domain.Admin;
-import domain.AdminStatus;
+import domain.UserStatus;
 import persistence.AdminRepository;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -72,19 +72,19 @@ class AdminServiceTest {
     @Test
     void logoutOfflineUser_ShouldFail() {
         Admin admin = adminService.findAdminByEmail("Mohammad");
-        admin.setStatus(AdminStatus.OFFLINE);
+        admin.setStatus(UserStatus.OFFLINE);
         Boolean result = adminService.logout("Mohammad");
         assertFalse(result, "Logout should fail for offline user");
-        assertEquals(AdminStatus.OFFLINE, admin.getStatus(), "Admin status should remain OFFLINE");
+        assertEquals(UserStatus.OFFLINE, admin.getStatus(), "Admin status should remain OFFLINE");
     }
 
     @Test
     void logoutOnlineUser_ShouldSucceed() {
         Admin admin = adminService.findAdminByEmail("Mohammad");
-        admin.setStatus(AdminStatus.ONLINE);
+        admin.setStatus(UserStatus.ONLINE);
         Boolean result = adminService.logout("Mohammad");
         assertTrue(result, "Logout should succeed for online user");
-        assertEquals(AdminStatus.OFFLINE, admin.getStatus(), "Admin status should become OFFLINE");
+        assertEquals(UserStatus.OFFLINE, admin.getStatus(), "Admin status should become OFFLINE");
     }
     // =================================================
 

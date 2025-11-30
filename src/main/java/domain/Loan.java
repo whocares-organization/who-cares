@@ -2,54 +2,45 @@ package domain;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.time.Instant;
 
 /**
  * Represents a loan transaction between a library member and a book or other media.
  *
- * <p>This class stores all relevant information about a loan, including
- * the media’s ID (or ISBN for books), the member’s ID, the borrow and due dates, whether
- * the media has been returned, and any fines accrued for overdue returns.</p>
+ * <p>Stores media identifier, member identifier (email), borrow and due dates,
+ * return status, fine amount, and testing-mode timing metadata.</p>
  */
 public class Loan {
 
-    // Backward-compatible identifiers
     /** The ID of the borrowed media (ISBN for books). */
     private String isbn;
-
     /** The ID of the member who borrowed the media. */
     private String memberId;
-
     /** The date when the media was borrowed. */
     private LocalDate borrowDate;
-
     /** The date when the media should be returned. */
     private LocalDate dueDate;
-
     /** Indicates whether the media has been returned. */
     private boolean returned;
-
     /** The total fine amount for overdue media. */
     private double fineAmount;
-
-    // Flag to ensure observers are notified only once per overdue transition
     private boolean overdueNotificationSent;
-
     /** The media associated with this loan, if any. */
     private Media media;
+    private long testingStartTimeMillis = 0L;
+    private int testingDurationSeconds = 0;
+    private Instant testingDueAt;
 
-    /**
-     * Default constructor that creates an empty {@code Loan} object.
-     */
+    /** Default constructor. */
     public Loan() {}
 
     /**
-     * Constructs a new {@code Loan} with the specified media details.
-     * The loan is initialized as not returned and with zero fine.
-     * The due date is calculated based on the media's borrow period.
+     * Constructs a loan for a given media and member at a borrow date.
+     * The default due date is derived from the media's borrow period.
      *
      * @param media the media being borrowed
-     * @param memberId the ID of the member borrowing the media
-     * @param borrowDate the date when the media was borrowed
+     * @param memberId the borrowing member's email/username
+     * @param borrowDate the borrow date
      */
     public Loan(Media media, String memberId, LocalDate borrowDate) {
         this.media = media;
@@ -59,20 +50,19 @@ public class Loan {
         this.fineAmount = 0;
         this.overdueNotificationSent = false;
         if (media != null) {
-            this.isbn = media.getId(); // mirror for compatibility
+            this.isbn = media.getId();
             this.dueDate = borrowDate.plusDays(media.getBorrowPeriod());
             media.borrowAt(borrowDate);
         }
     }
 
     /**
-     * Constructs a new {@code Loan} with the specified details.
-     * The loan is initialized as not returned and with zero fine.
+     * Constructs a loan with explicit identifiers and due date.
      *
-     * @param isbn the ID of the borrowed media (ISBN for books)
-     * @param memberId the ID of the member borrowing the media
-     * @param borrowDate the date when the media was borrowed
-     * @param dueDate the date when the media is due to be returned
+     * @param isbn the media identifier (ISBN or ID)
+     * @param memberId the borrowing member's email/username
+     * @param borrowDate the borrow date
+     * @param dueDate the normal due date
      */
     public Loan(String isbn, String memberId, LocalDate borrowDate, LocalDate dueDate) {
         this.isbn = isbn;
@@ -85,110 +75,80 @@ public class Loan {
     }
 
     /**
-     * Gets the ID of the borrowed media.
-     *
-     * @return the media’s ID (or ISBN for books)
+     * Returns the media identifier for this loan.
+     * @return media identifier (ISBN/ID), or {@code null} if unknown
      */
     public String getIsbn() {
         return isbn != null ? isbn : (media != null ? media.getId() : null);
     }
 
     /**
-     * Sets the ID of the borrowed media.
-     *
-     * @param isbn the media’s ID (or ISBN for books)
+     * Sets the media identifier.
+     * @param isbn media identifier (ISBN/ID)
      */
-    public void setIsbn(String isbn) {
-        this.isbn = isbn;
-    }
+    public void setIsbn(String isbn) { this.isbn = isbn; }
 
     /**
-     * Gets the ID of the member who borrowed the media.
-     *
-     * @return the member ID
+     * Returns the member identifier used by repositories (email/username).
+     * @return member identifier (email/username)
      */
-    public String getMemberId() {
-        return memberId;
-    }
+    public String getMemberId() { return memberId; }
 
     /**
-     * Sets the ID of the member who borrowed the media.
-     *
-     * @param memberId the member ID
+     * Sets the member identifier.
+     * @param memberId email/username of the borrowing member
      */
-    public void setMemberId(String memberId) {
-        this.memberId = memberId;
-    }
+    public void setMemberId(String memberId) { this.memberId = memberId; }
 
     /**
-     * Gets the date when the media was borrowed.
-     *
-     * @return the borrow date
+     * Returns the borrow date.
+     * @return borrow date value
      */
-    public LocalDate getBorrowDate() {
-        return borrowDate;
-    }
+    public LocalDate getBorrowDate() { return borrowDate; }
 
     /**
-     * Sets the date when the media was borrowed.
-     *
-     * @param borrowDate the borrow date
+     * Sets the borrow date.
+     * @param borrowDate borrow date value
      */
-    public void setBorrowDate(LocalDate borrowDate) {
-        this.borrowDate = borrowDate;
-    }
+    public void setBorrowDate(LocalDate borrowDate) { this.borrowDate = borrowDate; }
 
     /**
-     * Gets the date when the media is due for return.
-     *
-     * @return the due date
+     * Returns the normal due date.
+     * @return due date; may be {@code null} for certain flows
      */
-    public LocalDate getDueDate() {
-        return dueDate;
-    }
+    public LocalDate getDueDate() { return dueDate; }
 
     /**
-     * Sets the date when the media is due for return.
-     *
-     * @param dueDate the due date
+     * Sets the normal due date.
+     * @param dueDate normal due date value
      */
-    public void setDueDate(LocalDate dueDate) {
-        this.dueDate = dueDate;
-    }
+    public void setDueDate(LocalDate dueDate) { this.dueDate = dueDate; }
 
     /**
-     * Checks if the media has been returned.
-     *
-     * @return {@code true} if the media has been returned, {@code false} otherwise
+     * Returns whether the media was returned.
+     * @return {@code true} if returned; {@code false} otherwise
      */
-    public boolean isReturned() {
-        return returned;
-    }
+    public boolean isReturned() { return returned; }
 
     /**
-     * Sets the return status of the loan.
-     *
-     * @param returned {@code true} if the media has been returned, {@code false} otherwise
+     * Marks the loan as returned or not.
+     * @param returned {@code true} if returned; {@code false} otherwise
      */
-    public void setReturned(boolean returned) {
-        this.returned = returned;
-    }
+    public void setReturned(boolean returned) { this.returned = returned; }
 
     /**
-     * Checks if the loan is overdue based on the given date.
+     * Indicates if this loan is overdue relative to the given date.
      *
-     * @param today the current date
-     * @return {@code true} if the media is overdue and not yet returned, {@code false} otherwise
+     * @param today current date
+     * @return {@code true} if overdue and not returned; {@code false} otherwise
      */
     public boolean isOverdue(LocalDate today) {
         return !returned && dueDate != null && today.isAfter(dueDate);
     }
 
     /**
-     * Calculates the fine for overdue media based on the number of days late.
-     * <p>The fine is calculated using the media's fine per day rate, or 0.5 if not applicable.</p>
-     *
-     * @param today the current date
+     * Computes fine for overdue loans using media fine per day; sets fine to 0 if not overdue.
+     * @param today current date
      */
     public void calculateFine(LocalDate today) {
         if (isOverdue(today)) {
@@ -201,27 +161,20 @@ public class Loan {
     }
 
     /**
-     * Gets the total fine amount for the loan.
-     *
-     * @return the fine amount
+     * Returns the current fine amount.
+     * @return fine amount value
      */
-    public double getFineAmount() {
-        return fineAmount;
-    }
+    public double getFineAmount() { return fineAmount; }
 
     /**
-     * Sets the total fine amount for the loan.
-     *
-     * @param fineAmount the fine amount
+     * Sets the fine amount.
+     * @param fineAmount fine amount value
      */
-    public void setFineAmount(double fineAmount) {
-        this.fineAmount = fineAmount;
-    }
+    public void setFineAmount(double fineAmount) { this.fineAmount = fineAmount; }
 
     /**
-     * Returns a string representation of the loan with its details.
-     *
-     * @return a string describing the loan
+     * String representation of this loan.
+     * @return string with key fields
      */
     @Override
     public String toString() {
@@ -235,20 +188,80 @@ public class Loan {
                 '}';
     }
 
-    // Added accessor methods for observer logic
-    public boolean isOverdueNotificationSent() {
-        return overdueNotificationSent;
+    /**
+     * Returns whether an overdue notification has been sent (observer path).
+     * @return {@code true} if notification already sent; {@code false} otherwise
+     */
+    public boolean isOverdueNotificationSent() { return overdueNotificationSent; }
+
+    /**
+     * Marks that an overdue notification was sent once.
+     */
+    public void markOverdueNotificationSent() { this.overdueNotificationSent = true; }
+
+    /**
+     * Returns the associated media instance if available.
+     * @return media or {@code null}
+     */
+    public Media getMedia() { return media; }
+
+    /**
+     * Sets the associated media instance.
+     * @param media media instance
+     */
+    public void setMedia(Media media) { this.media = media; }
+
+    /**
+     * Sets testing-mode duration (seconds) and captures start time.
+     * Intended for short testing flows; does not change normal due date logic.
+     *
+     * @param seconds testing duration in seconds (> 0)
+     * @throws IllegalArgumentException if seconds &le; 0
+     */
+    public void setTestingDurationSeconds(int seconds) {
+        if (seconds <= 0) {
+            throw new IllegalArgumentException("Testing duration seconds must be > 0");
+        }
+        this.testingDurationSeconds = seconds;
+        this.testingStartTimeMillis = System.currentTimeMillis();
     }
 
-    public void markOverdueNotificationSent() {
-        this.overdueNotificationSent = true;
-    }
+    /**
+     * Returns testing-mode duration in seconds, if set (> 0); otherwise 0.
+     * @return testing duration seconds
+     */
+    public int getTestingDurationSeconds() { return this.testingDurationSeconds; }
 
-    public Media getMedia() {
-        return media;
-    }
+    /**
+     * Sets explicit testing-mode wall-clock due time. If present, expiry checks
+     * will use this timestamp in preference to start/duration fields.
+     *
+     * @param dueAt testing-mode due timestamp
+     */
+    public void setTestingDueDate(Instant dueAt) { this.testingDueAt = dueAt; }
 
-    public void setMedia(Media media) {
-        this.media = media;
+    /**
+     * Returns explicit testing-mode due timestamp, if set.
+     * @return testing due {@link Instant} or {@code null}
+     */
+    public Instant getTestingDueDate() { return this.testingDueAt; }
+
+    /**
+     * Returns true if testing-mode duration has expired.
+     * Prefers explicit wall-clock due timestamp when available; otherwise uses start time + duration.
+     * The check is independent from the normal due date.
+     *
+     * @return {@code true} if expired in testing mode; {@code false} otherwise
+     */
+    public boolean isTestingDurationExpired() {
+        if (returned) return false;
+        if (testingDueAt != null) {
+            return Instant.now().isAfter(testingDueAt);
+        }
+        if (testingDurationSeconds <= 0 || testingStartTimeMillis <= 0L) {
+            return false;
+        }
+        long elapsedSec = (System.currentTimeMillis() - testingStartTimeMillis) / 1000L;
+        return elapsedSec >= testingDurationSeconds;
     }
 }

@@ -7,7 +7,7 @@ import domain.Book;
 import domain.CD;
 import domain.Loan;
 import domain.Member;
-import domain.AdminStatus;
+import domain.UserStatus;
 import persistence.AdminRepository;
 import persistence.LoanRepository;
 import persistence.BookRepository;
@@ -33,7 +33,7 @@ class MediaPolymorphismTest {
         adminActions = new AdminActions();
         admin = new AdminFileLoader("admins.txt").loadAdmins().get(0);
         AdminRepository.addAdmin(admin);
-        admin.setStatus(AdminStatus.ONLINE);
+        admin.setStatus(UserStatus.ONLINE);
     }
 
     @AfterEach

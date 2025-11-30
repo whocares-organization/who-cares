@@ -5,23 +5,20 @@ import java.time.LocalDate;
 /**
  * Represents a book in the library system.
  * 
- * <p>Stores information about the book's title, author, ISBN, and whether it is currently borrowed.
- * Provides methods to access and modify this information.
- * </p>
+ * <p>Stores information about the book's title, author, and ISBN, and whether it is currently borrowed.
+ * Provides methods to access and modify this information.</p>
  */
-public class Book extends Media { // extend Media for polymorphism
+public class Book extends Media {
 
   private String author;
-  // retain backwards-compatible fields
-  private String isbn; // mirrors Media id
+  private String isbn;
 
   /**
    * Constructs a Book with the specified details.
    *
-   * @param title      the title of the book
-   * @param author     the author of the book
-   * @param isbn       the ISBN of the book
-   * @param isBorrowed true if the book is currently borrowed, false otherwise
+   * @param title the title of the book
+   * @param author the author of the book
+   * @param isbn the ISBN of the book
    */
   public Book(String title, String author, String isbn) {
     super(isbn, title);
@@ -32,17 +29,15 @@ public class Book extends Media { // extend Media for polymorphism
   /**
    * Default constructor. Initializes an empty book object.
    */
-  public Book() {
-    super();
-  }
+  public Book() { super(); }
 
   /**
-   * Constructs a Book with the specified details.
+   * Constructs a Book with the specified details and borrowed state.
    *
-   * @param title      the title of the book
-   * @param author     the author of the book
-   * @param isbn       the ISBN of the book
-   * @param isBorrowed true if the book is currently borrowed, false otherwise
+   * @param title the title of the book
+   * @param author the author of the book
+   * @param isbn the ISBN of the book
+   * @param isBorrowed {@code true} if the book is currently borrowed, {@code false} otherwise
    */
   public Book(String title, String author, String isbn, boolean isBorrowed) {
     super(isbn, title);
@@ -51,56 +46,39 @@ public class Book extends Media { // extend Media for polymorphism
     setBorrowed(isBorrowed);
   }
 
-  // Backward-compatible getters/setters
   /**
    * Returns the title of the book.
-   *
    * @return the book title
    */
-  public String getTitle() {
-    return super.getTitle();
-  }
+  public String getTitle() { return super.getTitle(); }
 
   /**
    * Updates the title of the book.
-   *
    * @param title the new title
    */
-  public void setTitle(String title) {
-    super.setTitle(title);
-  }
+  public void setTitle(String title) { super.setTitle(title); }
 
   /**
    * Returns the author of the book.
-   *
-   * @return the author
+   * @return the author name
    */
-  public String getAuthor() {
-    return author;
-  }
+  public String getAuthor() { return author; }
 
   /**
    * Updates the author of the book.
-   *
-   * @param author the new author
+   * @param author the new author name
    */
-  public void setAuthor(String author) {
-    this.author = author;
-  }
+  public void setAuthor(String author) { this.author = author; }
 
   /**
    * Returns the ISBN of the book.
-   *
-   * @return the ISBN
+   * @return the ISBN value
    */
-  public String getIsbn() {
-    return isbn;
-  }
+  public String getIsbn() { return isbn; }
 
   /**
-   * Updates the ISBN of the book.
-   *
-   * @param isbn the new ISBN
+   * Updates the ISBN of the book and the media id.
+   * @param isbn the new ISBN value
    */
   public void setIsbn(String isbn) {
     this.isbn = isbn;
@@ -109,25 +87,18 @@ public class Book extends Media { // extend Media for polymorphism
 
   /**
    * Returns whether the book is currently borrowed.
-   *
-   * @return true if borrowed, false otherwise
+   * @return {@code true} if borrowed; {@code false} otherwise
    */
-  public boolean isBorrowed() {
-    return super.isBorrowed();
-  }
+  public boolean isBorrowed() { return super.isBorrowed(); }
 
   /**
    * Updates the borrowed status of the book.
-   *
-   * @param borrowed true if the book is borrowed, false otherwise
+   * @param borrowed {@code true} if the book is borrowed; {@code false} otherwise
    */
-  public void setBorrowed(boolean borrowed) {
-    super.setBorrowed(borrowed);
-  }
+  public void setBorrowed(boolean borrowed) { super.setBorrowed(borrowed); }
 
   /**
    * Returns a string representation of the book object.
-   *
    * @return a string containing the title, author, and ISBN
    */
   @Override
@@ -135,14 +106,17 @@ public class Book extends Media { // extend Media for polymorphism
     return "Book{" + "title='" + getTitle() + '\'' + ", author='" + author + '\'' + ", isbn='" + isbn + '\'' + '}';
   }
 
-  // Polymorphic contract implementation
+  /**
+   * Returns the borrow period policy for books.
+   * @return number of days a book can be borrowed
+   */
   @Override
-  public int getBorrowPeriod() {
-    return 28; // updated from 14 to 28 days
-  }
+  public int getBorrowPeriod() { return 28; }
 
+  /**
+   * Returns the fine per day policy for books.
+   * @return fine amount per overdue day
+   */
   @Override
-  public double getFinePerDay() {
-    return 10.0;
-  }
+  public double getFinePerDay() { return 10.0; }
 }

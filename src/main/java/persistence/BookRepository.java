@@ -11,9 +11,9 @@ import applicationsearchbooks.BookSearchStrategy;
 
 /**
  * Repository class for managing Book entities in temporary storage.
- * 
+ *
  * <p>Provides methods to add, remove, retrieve, and search for books.
- * This implementation uses a static ArrayList to store all book instances during runtime.
+ * This implementation uses a static ArrayList to store all book instances during runtime.</p>
  */
 public class BookRepository {
 
@@ -23,12 +23,14 @@ public class BookRepository {
   private static final Logger logger = Logger.getLogger(BookRepository.class.getName());
   
   /**
+   * Creates a new {@code BookRepository} with empty in-memory storage.
+   */
+  public BookRepository() { }
+
+  /**
    * Sets the search strategy for the repository.
    *
-   * <p>This allows changing the behavior of the search method dynamically.
-   * For example, you can use {@link applicationsearchbooks.TitleSearchStrategy},
-   * {@link applicationsearchbooks.AuthorSearchStrategy}, or
-   * {@link applicationsearchbooks.IsbnSearchStrategy}.</p>
+   * <p>This allows changing the behavior of the search method dynamically.</p>
    *
    * @param searchStrategy the search strategy to use for book searches
    */
@@ -38,11 +40,6 @@ public class BookRepository {
 
   /**
    * Searches the repository for books matching the given keyword using the currently set search strategy.
-   *
-   * <p>Logs the keyword being searched and the number of results found using the {@link java.util.logging.Logger}.</p>
-   *
-   * <p><b>Important:</b> A search strategy must be set before calling this method, otherwise
-   * an {@link IllegalStateException} is thrown.</p>
    *
    * @param keyword the keyword to search for (e.g., part of title, author, or ISBN)
    * @return a list of books matching the keyword; empty if no books match
@@ -61,7 +58,6 @@ public class BookRepository {
       return result;
   }
 
-
   /**
    * Adds a new book to the repository.
    *
@@ -71,10 +67,21 @@ public class BookRepository {
     books.add(book);
   }
 
+  /**
+   * Returns the internal list reference of books (mutable).
+   * Prefer {@link #findAll()} for an immutable snapshot.
+   *
+   * @return the current internal books list (mutable reference)
+   */
   public static ArrayList<Book> getBooks() {
 	return books;
 }
 
+  /**
+   * Replaces the internal books list with the provided list reference.
+   *
+   * @param books the new list reference to use as storage (must not be {@code null})
+   */
   public static void setBooks(ArrayList<Book> books) {
 	BookRepository.books = books;
   }
@@ -98,12 +105,10 @@ public class BookRepository {
   }
 
   /**
-   * Searches for books by a keyword.
-   *
-   * <p>The search matches the keyword against the title, author, or ISBN of each book.
+   * Searches for the first book by a keyword across title, author, or ISBN.
    *
    * @param keyword the search keyword
-   * @return a list of books matching the keyword
+   * @return the first matching book or {@code null} if none found
    */
   public static Book searchBook(String keyword) {
 	    if (keyword == null || keyword.isEmpty()) {
@@ -120,20 +125,21 @@ public class BookRepository {
 	        .orElse(null); 
 	}
   
+  /**
+   * Finds a book by exact ISBN match.
+   *
+   * @param isbn the ISBN value to find
+   * @return the matching book or {@code null} if not found
+   */
   public static Book findBookByIsbn(String isbn) {
       return books.stream()
           .filter(b -> isbn.equals(b.getIsbn()))
           .findFirst()
-          .map(b -> {
-              
-              return b;
-          })
-          .orElseGet(() -> {
-              
-              return null;
-          });
+          .map(b -> b)
+          .orElseGet(() -> null);
   }
   
+  /** Clears all books in the repository (useful for tests). */
   public static void clearBooks() {
 	    books.clear();
 	}
@@ -141,21 +147,18 @@ public class BookRepository {
   /**
    * Retrieves a list of all books stored in the repository.
    *
-   * <p>This method returns a new {@link ArrayList} containing all the books
-   * from the internal collection, preventing external modification of the
-   * original list.</p>
-   *
-   * @return a list of all books in the repository
+   * @return a new list copy containing all books
    */
-
   public static List<Book> findAll() {
       return new ArrayList<>(books);
   }
   
+  /**
+   * Returns all books currently marked as borrowed.
+   *
+   * @return list of borrowed books
+   */
   public static List<Book> findAllBorrowed() {
       return books.stream().filter(Book::isBorrowed).collect(java.util.stream.Collectors.toList());
   }
-  
-  
-  
 }

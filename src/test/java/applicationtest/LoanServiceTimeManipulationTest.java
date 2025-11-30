@@ -32,7 +32,11 @@ class LoanServiceTimeManipulationTest {
 
     @BeforeEach
     void setUp() {
-   
+        // Clear in-memory repositories to avoid test interference
+        LoanRepository.clearLoans();
+        BookRepository.clearBooks();
+        MemberRepository.clearMembers();
+        
         loanService = new LoanService();
         emailService = Mockito.mock(EmailService.class);
         // Register observer to capture notifications
