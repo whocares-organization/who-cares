@@ -5,15 +5,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Repository class for managing {@link Member} entities in memory.
+ * In-memory repository for {@link Member} entities.
  *
- * <p>This repository provides CRUD-like operations for members,
- * including adding, finding, removing, and clearing records.</p>
+ * <p>Provides basic operations for storing and looking up members.</p>
  */
 public class MemberRepository {
 
     /** In-memory storage for all registered members. */
     private static ArrayList<Member> members = new ArrayList<>();
+
+    /**
+     * Creates a new {@code MemberRepository} with empty storage.
+     */
+    public MemberRepository() { }
 
     /**
      * Adds a new member to the repository if not already present.

@@ -12,14 +12,17 @@ import java.util.List;
 /**
  * Loads administrator data from an external file into Admin objects.
  * Implements AdminSourceLoader to read CSV/text files with username,password.
- * 
- * Loaded Admin objects can be stored in a repository.
  */
 public class AdminFileLoader implements AdminSourceLoader {
 	
 	private static final Logger LOGGER = Logger.getLogger(AdminFileLoader.class.getName());
 	private final String fileName;
 
+	/**
+	 * Creates a new loader that reads admin records from a classpath resource.
+	 *
+	 * @param fileName the resource name to load (e.g., "admins.csv")
+	 */
 	public AdminFileLoader(final String fileName) {
 	    this.fileName = fileName;
 	}
@@ -28,6 +31,7 @@ public class AdminFileLoader implements AdminSourceLoader {
 	 * Reads the file and creates Admin objects with username and password.
 	 *
 	 * @return a list of Admin objects loaded from the file
+	 * @throws Exception if reading the resource fails
 	 */
 	@Override
 	public List<Admin> loadAdmins() throws Exception {
