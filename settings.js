@@ -378,15 +378,14 @@ function initializeActionButtons() {
     const deleteAccountBtn = document.getElementById('deleteAccountBtn');
     if (deleteAccountBtn) {
         deleteAccountBtn.addEventListener('click', function() {
-            const confirmation = prompt('This action is irreversible. Type "DELETE" to confirm:');
-            if (confirmation === 'DELETE') {
+            if (confirm('⚠️ WARNING: This action is irreversible and will permanently delete your account and all data. Are you absolutely sure?')) {
                 // Simulate account deletion
                 this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Deleting...';
                 setTimeout(() => {
-                    alert('Account deletion initiated. You will receive a confirmation email.');
+                    showToast('Account deletion initiated. Check your email for confirmation.');
                     this.innerHTML = '<i class="fas fa-user-times"></i> Delete Account';
                 }, 1000);
-            } else if (confirmation !== null) {
+            } else {
                 showToast('Account deletion cancelled', 'warning');
             }
         });
@@ -484,13 +483,7 @@ document.addEventListener('keydown', function(e) {
 // ====================================
 // SMOOTH ANIMATIONS ON LOAD
 // ====================================
-window.addEventListener('load', function() {
-    document.body.style.opacity = '0';
-    setTimeout(() => {
-        document.body.style.transition = 'opacity 0.5s ease';
-        document.body.style.opacity = '1';
-    }, 100);
-});
+// Removed to prevent flash of invisible content
 
 // ====================================
 // UTILITY FUNCTIONS
@@ -510,7 +503,5 @@ function debounce(func, wait) {
 }
 
 // Log settings changes for debugging
-if (console && console.log) {
-    console.log('%c⚙️ Settings Page Loaded', 'color: #00d9ff; font-size: 16px; font-weight: bold;');
-    console.log('%cAll interactive features initialized', 'color: #22c55e;');
-}
+console.log('%c⚙️ Settings Page Loaded', 'color: #00d9ff; font-size: 16px; font-weight: bold;');
+console.log('%cAll interactive features initialized', 'color: #22c55e;');
