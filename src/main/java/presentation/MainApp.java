@@ -23,6 +23,7 @@ import persistence.BookRepository;
 import persistence.LoanRepository;
 import persistence.MemberRepository;
 
+
 /**
  * Entry point for the Library Management System CLI application.
  *
@@ -42,7 +43,7 @@ public class MainApp {
      * @throws Exception if initialization fails
      */
     public static void main(String[] args) throws Exception {
-
+    	
         // ---------------------------
         // Create repositories
         // ---------------------------
