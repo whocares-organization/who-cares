@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Settings - Anime Portal</title>
+    <link rel="stylesheet" href="settings.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="settings-container">
+        <!-- Sidebar Navigation -->
+        <aside class="settings-sidebar">
+            <div class="sidebar-header">
+                <i class="fas fa-cog"></i>
+                <h2>Settings</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <button class="nav-item active" data-section="profile">
+                    <i class="fas fa-user"></i>
+                    <span>Profile</span>
+                </button>
+                <button class="nav-item" data-section="appearance">
+                    <i class="fas fa-palette"></i>
+                    <span>Appearance</span>
+                </button>
+                <button class="nav-item" data-section="notifications">
+                    <i class="fas fa-bell"></i>
+                    <span>Notifications</span>
+                </button>
+                <button class="nav-item" data-section="video">
+                    <i class="fas fa-play-circle"></i>
+                    <span>Video Player</span>
+                </button>
+                <button class="nav-item" data-section="privacy">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>Privacy & Security</span>
+                </button>
+                <button class="nav-item" data-section="account">
+                    <i class="fas fa-user-cog"></i>
+                    <span>Account</span>
+                </button>
+            </nav>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="settings-content">
+            <!-- Profile Settings Section -->
+            <section id="profile-section" class="settings-section active">
+                <div class="section-header">
+                    <h2>Profile Settings</h2>
+                    <p>Manage your personal information</p>
+                </div>
+
+                <div class="settings-card">
+                    <div class="profile-image-section">
+                        <div class="profile-image-wrapper">
+                            <img id="profilePreview" src="https://via.placeholder.com/150/1a1a2e/00d9ff?text=User" alt="Profile Picture">
+                            <div class="image-overlay">
+                                <i class="fas fa-camera"></i>
+                            </div>
+                        </div>
+                        <div class="image-controls">
+                            <input type="file" id="profileImageInput" accept="image/*" hidden>
+                            <button class="btn-secondary" onclick="document.getElementById('profileImageInput').click()">
+                                <i class="fas fa-upload"></i> Upload Photo
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="username">
+                            <i class="fas fa-user"></i> Username
+                        </label>
+                        <input type="text" id="username" placeholder="Enter your username" value="AnimeOtaku2024">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">
+                            <i class="fas fa-envelope"></i> Email Address
+                        </label>
+                        <input type="email" id="email" placeholder="Enter your email" value="user@anime-portal.com">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password">
+                            <i class="fas fa-lock"></i> Password
+                        </label>
+                        <div class="password-input-wrapper">
+                            <input type="password" id="password" placeholder="Enter new password">
+                            <button class="password-toggle" id="passwordToggle">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="bio">
+                            <i class="fas fa-align-left"></i> Bio
+                        </label>
+                        <textarea id="bio" rows="4" placeholder="Tell us about yourself...">Anime enthusiast | Manga reader | Gaming addict</textarea>
+                    </div>
+
+                    <button class="btn-primary save-btn">
+                        <i class="fas fa-save"></i> Save Changes
+                    </button>
+                </div>
+            </section>
+
+            <!-- Appearance Settings Section -->
+            <section id="appearance-section" class="settings-section">
+                <div class="section-header">
+                    <h2>Appearance</h2>
+                    <p>Customize the look and feel</p>
+                </div>
+
+                <div class="settings-card">
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <h3><i class="fas fa-moon"></i> Theme</h3>
+                            <p>Switch between light and dark mode</p>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="themeToggle" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <h3><i class="fas fa-palette"></i> Accent Color</h3>
+                            <p>Choose your preferred accent color</p>
+                        </div>
+                        <div class="accent-colors">
+                            <button class="accent-color active" data-color="#00d9ff" style="background-color: #00d9ff;">
+                                <i class="fas fa-check"></i>
+                            </button>
+                            <button class="accent-color" data-color="#ff0080" style="background-color: #ff0080;">
+                                <i class="fas fa-check"></i>
+                            </button>
+                            <button class="accent-color" data-color="#a855f7" style="background-color: #a855f7;">
+                                <i class="fas fa-check"></i>
+                            </button>
+                            <button class="accent-color" data-color="#22c55e" style="background-color: #22c55e;">
+                                <i class="fas fa-check"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="preview-section">
+                        <h3>Preview</h3>
+                        <div class="preview-card">
+                            <div class="preview-content">
+                                <i class="fas fa-star"></i>
+                                <h4>Sample Card</h4>
+                                <p>This is how your theme will look</p>
+                                <button class="btn-preview">Action Button</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Notifications Section -->
+            <section id="notifications-section" class="settings-section">
+                <div class="section-header">
+                    <h2>Notifications</h2>
+                    <p>Manage your notification preferences</p>
+                </div>
+
+                <div class="settings-card">
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <h3><i class="fas fa-tv"></i> New Episode Alerts</h3>
+                            <p>Get notified when new episodes are available</p>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" class="notification-toggle" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <h3><i class="fas fa-bookmark"></i> Anime Bookmark Updates</h3>
+                            <p>Updates for your bookmarked anime series</p>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" class="notification-toggle" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <h3><i class="fas fa-fire"></i> New Releases</h3>
+                            <p>Get notified about new anime releases</p>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" class="notification-toggle">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <h3><i class="fas fa-comments"></i> Comment Replies</h3>
+                            <p>Notifications for replies to your comments</p>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" class="notification-toggle" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Video Player Preferences Section -->
+            <section id="video-section" class="settings-section">
+                <div class="section-header">
+                    <h2>Video Player Preferences</h2>
+                    <p>Customize your viewing experience</p>
+                </div>
+
+                <div class="settings-card">
+                    <div class="form-group">
+                        <label for="videoQuality">
+                            <i class="fas fa-video"></i> Default Video Quality
+                        </label>
+                        <select id="videoQuality">
+                            <option value="auto">Auto</option>
+                            <option value="1080p" selected>1080p</option>
+                            <option value="720p">720p</option>
+                            <option value="480p">480p</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="subtitleLang">
+                            <i class="fas fa-closed-captioning"></i> Subtitle Language
+                        </label>
+                        <select id="subtitleLang">
+                            <option value="en" selected>English</option>
+                            <option value="jp">Japanese</option>
+                            <option value="es">Spanish</option>
+                            <option value="fr">French</option>
+                            <option value="de">German</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="subtitleSize">
+                            <i class="fas fa-text-height"></i> Subtitle Font Size
+                        </label>
+                        <div class="slider-container">
+                            <input type="range" id="subtitleSize" min="12" max="24" value="16">
+                            <span class="slider-value" id="subtitleSizeValue">16px</span>
+                        </div>
+                    </div>
+
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <h3><i class="fas fa-forward"></i> Autoplay Next Episode</h3>
+                            <p>Automatically play the next episode</p>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="autoplayToggle" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Privacy & Security Section -->
+            <section id="privacy-section" class="settings-section">
+                <div class="section-header">
+                    <h2>Privacy & Security</h2>
+                    <p>Manage your privacy and security settings</p>
+                </div>
+
+                <div class="settings-card">
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <h3><i class="fas fa-lock"></i> Two-Factor Authentication</h3>
+                            <p>Add an extra layer of security to your account</p>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="twoFactorToggle">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <h3><i class="fas fa-mobile-alt"></i> Manage Devices</h3>
+                            <p>See and manage devices where you're logged in</p>
+                        </div>
+                        <button class="btn-secondary">
+                            <i class="fas fa-external-link-alt"></i> View Devices
+                        </button>
+                    </div>
+
+                    <div class="setting-item danger-zone">
+                        <div class="setting-info">
+                            <h3><i class="fas fa-trash-alt"></i> Clear Watch History</h3>
+                            <p>Remove all your viewing history</p>
+                        </div>
+                        <button class="btn-danger" id="clearHistoryBtn">
+                            <i class="fas fa-trash"></i> Clear History
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Account Management Section -->
+            <section id="account-section" class="settings-section">
+                <div class="section-header">
+                    <h2>Account Management</h2>
+                    <p>Manage your account settings</p>
+                </div>
+
+                <div class="settings-card">
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <h3><i class="fas fa-sign-out-alt"></i> Log Out All Devices</h3>
+                            <p>Sign out from all devices except this one</p>
+                        </div>
+                        <button class="btn-secondary" id="logoutAllBtn">
+                            <i class="fas fa-power-off"></i> Log Out All
+                        </button>
+                    </div>
+
+                    <div class="setting-item danger-zone">
+                        <div class="setting-info">
+                            <h3><i class="fas fa-exclamation-triangle"></i> Delete Account</h3>
+                            <p>Permanently delete your account and all data</p>
+                        </div>
+                        <button class="btn-danger" id="deleteAccountBtn">
+                            <i class="fas fa-user-times"></i> Delete Account
+                        </button>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Success Toast Notification -->
+    <div class="toast" id="successToast">
+        <i class="fas fa-check-circle"></i>
+        <span>Settings saved successfully!</span>
+    </div>
+
+    <script src="settings.js"></script>
+</body>
+</html>
