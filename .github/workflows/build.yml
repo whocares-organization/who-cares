@@ -44,3 +44,4 @@ jobs:
             -Dsonar.projectKey=whocares-organization_who-cares
             -Dsonar.organization=whocares-organization
             -Dsonar.host.url=https://sonarcloud.io
+            -Dsonar.java.binaries=target/classes
