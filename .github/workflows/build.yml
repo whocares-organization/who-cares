@@ -31,10 +31,16 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
 
-     
-      - name: Build and run tests with Maven
-        run: mvn -B clean verify --file pom.xml
+      
+      - name: Build, test and generate coverage with Maven
+        run: |
+          mvn -B clean \
+            org.jacoco:jacoco-maven-plugin:prepare-agent \
+            verify \
+            org.jacoco:jacoco-maven-plugin:report \
+            --file pom.xml
 
+      
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
         env:
@@ -47,3 +53,4 @@ jobs:
             -Dsonar.host.url=https://sonarcloud.io
             -Dsonar.java.binaries=target/classes
             -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
+            -Dsonar.coverage.exclusions=**/Main.java
