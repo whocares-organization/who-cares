@@ -205,7 +205,25 @@ class BookServiceTest {
                 "setRepository should update the internal repository reference");
    }
 
-   
+
+    @Test
+    void getAllBooks_shouldReturnAllBooksInRepository() {
+        List<Book> books = bookService.getAllBooks();
+        assertEquals(1, books.size(), "getAllBooks should return 1 book after setup");
+        assertEquals("Olds", books.get(0).getTitle(), "Title of the first book should be 'Olds'");
+        assertEquals("Majd", books.get(0).getAuthor(), "Author of the first book should be 'Majd'");
+        assertEquals("12345", books.get(0).getIsbn(), "ISBN of the first book should be '12345'");
+    }
+
+    @Test
+    void countBooks_shouldReturnNumberOfBooksInRepository() {
+        assertEquals(1, bookService.countBooks(),
+                "countBooks should return 1 after setup");
+        bookService.addBook(new Book("New Title", "New Author", "99999"));
+        assertEquals(2, bookService.countBooks(),
+                "countBooks should return 2 after adding another book");
+    }
+
     
 
 }
