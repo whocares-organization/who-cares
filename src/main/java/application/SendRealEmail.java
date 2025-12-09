@@ -99,7 +99,6 @@ public class SendRealEmail implements EmailService {
         String subject = "Book Due Reminder";
         String body = "Dear user, Your book is due soon. Best regards, An Najah Library System";
 
-        
         String recipient = "s12218125@stu.najah.edu";
         emailService.sendEmail(recipient, subject, body);
     }

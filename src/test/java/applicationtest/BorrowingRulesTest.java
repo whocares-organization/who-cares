@@ -44,31 +44,58 @@ class BorrowingRulesTest {
 
     @Test
     void canBorrowWithOverdueLoans_ShouldReturnFalse() {
-        Loan overdue = new Loan("ISBN1", member.getUserName(), LocalDate.now().minusDays(10), LocalDate.now().minusDays(5));
+        Loan overdue = new Loan(
+                "ISBN1",
+                member.getUserName(),
+                LocalDate.now().minusDays(10),
+                LocalDate.now().minusDays(5)
+        );
         LoanRepository.save(overdue);
+
         assertFalse(rules.canBorrow(member, repo));
+    }
+
+    @Test
+    void canBorrowWithNullMember_ShouldReturnFalse() {
+        assertFalse(rules.canBorrow(null, repo));
     }
     // ====================================================
 
     // ================= ensureCanBorrow Tests =================
     @Test
     void ensureCanBorrowWithNullMember_ShouldThrow() {
-        IllegalStateException ex = assertThrows(IllegalStateException.class, () -> rules.ensureCanBorrow(null, repo));
+        IllegalStateException ex = assertThrows(
+                IllegalStateException.class,
+                () -> rules.ensureCanBorrow(null, repo)
+        );
         assertEquals("Member not found!", ex.getMessage());
     }
 
     @Test
     void ensureCanBorrowWithUnpaidFines_ShouldThrow() {
         member.addMemberFine(2.0);
-        IllegalStateException ex = assertThrows(IllegalStateException.class, () -> rules.ensureCanBorrow(member, repo));
+
+        IllegalStateException ex = assertThrows(
+                IllegalStateException.class,
+                () -> rules.ensureCanBorrow(member, repo)
+        );
         assertEquals("Member has unpaid fines!", ex.getMessage());
     }
 
     @Test
     void ensureCanBorrowWithOverdueLoans_ShouldThrow() {
-        Loan overdue = new Loan("ISBN2", member.getUserName(), LocalDate.now().minusDays(12), LocalDate.now().minusDays(3));
+        Loan overdue = new Loan(
+                "ISBN2",
+                member.getUserName(),
+                LocalDate.now().minusDays(12),
+                LocalDate.now().minusDays(3)
+        );
         LoanRepository.save(overdue);
-        IllegalStateException ex = assertThrows(IllegalStateException.class, () -> rules.ensureCanBorrow(member, repo));
+
+        IllegalStateException ex = assertThrows(
+                IllegalStateException.class,
+                () -> rules.ensureCanBorrow(member, repo)
+        );
         assertEquals("Member has overdue loans!", ex.getMessage());
     }
 
