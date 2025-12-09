@@ -55,9 +55,9 @@ public class SendRealEmail implements EmailService {
     /**
      * Sends an email with the specified subject and body to the given recipient.
      *
-     * @param to      the recipient's email address
+     * @param to the recipient's email address
      * @param subject the subject of the email
-     * @param body    the body of the email
+     * @param body the body of the email
      */
     @Override
     public void sendEmail(String to, String subject, String body) {
@@ -72,6 +72,7 @@ public class SendRealEmail implements EmailService {
             msg.setRecipients(Message.RecipientType.TO, InternetAddress.parse(to, false));
             msg.setSubject(subject != null ? subject : "(no subject)");
             msg.setText(body != null ? body : "");
+
             Transport.send(msg);
             logger.info("✅ Email sent successfully to " + to);
         } catch (MessagingException e) {
@@ -98,8 +99,8 @@ public class SendRealEmail implements EmailService {
 
         String subject = "Book Due Reminder";
         String body = "Dear user, Your book is due soon. Best regards, An Najah Library System";
-
         String recipient = "s12218125@stu.najah.edu";
+
         emailService.sendEmail(recipient, subject, body);
     }
 

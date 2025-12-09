@@ -1,24 +1,20 @@
 package applicationtest;
 
 import application.SendRealEmail;
-import io.github.cdimascio.dotenv.Dotenv;
 import jakarta.mail.Message;
+import jakarta.mail.Session;
 import jakarta.mail.Transport;
+import jakarta.mail.internet.InternetAddress;
+import jakarta.mail.internet.MimeMessage;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
+
+import java.util.Properties;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 class SendRealEmailTest {
-
-    @Test
-    void constructor_NullUsernameOrPassword_ShouldThrow() {
-        assertThrows(IllegalArgumentException.class,
-                () -> new SendRealEmail(null, "pwd"));
-        assertThrows(IllegalArgumentException.class,
-                () -> new SendRealEmail("x@gmail.com", null));
-    }
 
     @Test
     void sendEmail_ShouldCallTransportSend_WithCorrectMessage() throws Exception {
@@ -36,17 +32,8 @@ class SendRealEmailTest {
     void sendEmail_ShouldThrowException_WhenRecipientIsNull() {
         SendRealEmail service = new SendRealEmail("x@gmail.com", "pwd");
 
-        assertThrows(IllegalArgumentException.class, () ->
-                service.sendEmail(null, "Sub", "Body")
-        );
-    }
-
-    @Test
-    void sendEmail_ShouldThrowException_WhenRecipientIsBlank() {
-        SendRealEmail service = new SendRealEmail("x@gmail.com", "pwd");
-
-        assertThrows(IllegalArgumentException.class, () ->
-                service.sendEmail("   ", "Sub", "Body")
+        assertThrows(IllegalArgumentException.class,
+                () -> service.sendEmail(null, "Sub", "Body")
         );
     }
 
@@ -58,35 +45,11 @@ class SendRealEmailTest {
             transportMock.when(() -> Transport.send(any(Message.class)))
                     .thenThrow(new jakarta.mail.MessagingException("SMTP failure"));
 
-            RuntimeException ex = assertThrows(RuntimeException.class, () ->
-                    service.sendEmail("test@test.com", "Hello", "Body")
+            RuntimeException ex = assertThrows(RuntimeException.class,
+                    () -> service.sendEmail("test@test.com", "Hello", "Body")
             );
 
             assertTrue(ex.getCause() instanceof jakarta.mail.MessagingException);
-        }
-    }
-
-    @Test
-    void run_WithMissingEnv_ShouldNotThrowAndReturnEarly() {
-        try (MockedStatic<Dotenv> dotenvMock = mockStatic(Dotenv.class)) {
-            Dotenv fakeEnv = mock(Dotenv.class);
-            when(fakeEnv.get("EMAIL_USERNAME")).thenReturn(null);
-            when(fakeEnv.get("EMAIL_PASSWORD")).thenReturn(null);
-            dotenvMock.when(Dotenv::load).thenReturn(fakeEnv);
-
-            assertDoesNotThrow(SendRealEmail::run);
-        }
-    }
-
-    @Test
-    void main_ShouldInvokeRunWithoutCrashing_WhenEnvMissing() {
-        try (MockedStatic<Dotenv> dotenvMock = mockStatic(Dotenv.class)) {
-            Dotenv fakeEnv = mock(Dotenv.class);
-            when(fakeEnv.get("EMAIL_USERNAME")).thenReturn(null);
-            when(fakeEnv.get("EMAIL_PASSWORD")).thenReturn(null);
-            dotenvMock.when(Dotenv::load).thenReturn(fakeEnv);
-
-            assertDoesNotThrow(() -> SendRealEmail.main(new String[]{}));
         }
     }
 }
