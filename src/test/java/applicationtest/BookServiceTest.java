@@ -203,7 +203,7 @@ class BookServiceTest {
         bookService.setRepository(newRepository);
         assertSame(newRepository, bookService.getRepository(),
                 "setRepository should update the internal repository reference");
-    }
+   }
 
    
     
