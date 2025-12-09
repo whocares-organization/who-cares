@@ -1,9 +1,7 @@
 package application;
 
 import domain.Book;
-import domain.Member;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.logging.Logger;
 

@@ -196,7 +196,16 @@ class BookServiceTest {
         assertTrue(result, "Removing existing book should return true");
         assertNull(bookService.searchBooks("12345"), "Book should no longer exist in repository");
     }
-    // =====================================================
+    
+    @Test
+    void whenSetRepository_thenRepositoryIsUpdated() {
+        BookRepository newRepository = new BookRepository();
+        bookService.setRepository(newRepository);
+        assertSame(newRepository, bookService.getRepository(),
+                "setRepository should update the internal repository reference");
+    }
+
+   
     
 
 }
