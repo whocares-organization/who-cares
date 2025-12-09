@@ -1,9 +1,7 @@
 package application;
 
 import domain.Book;
-import domain.Member;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -156,24 +154,23 @@ public class BookService {
   }
   
   /**
+   * Returns a snapshot of all books in the repository.
+   *
+   * @return list of all books (never null)
+   */
+  public List<Book> getAllBooks() {
+      return repository.findAll();
+  }
+
+  /**
    * Counts the total number of books tracked by the repository.
    *
    * @return the number of books currently stored
    */
   public int countBooks() {
-	    return repository.findAll().size();
-	}
+      return getAllBooks().size();
+  }
 
-	/**
-	 * Returns a snapshot of all books in the repository.
-	 *
-	 * @return list of all books (never null)
-	 */
-	public List<Book> getAllBooks() {
-	    return repository.findAll();
-	}
-
-  
   //=================worked by montaser===========================//////////
   
   
