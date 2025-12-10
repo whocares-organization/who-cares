@@ -28,6 +28,14 @@ public class AdminFileLoader implements AdminSourceLoader {
 	}
 
 	/**
+	 * Factory method extracted to allow overriding in tests.
+	 * Creates a BufferedReader for the given InputStream.
+	 */
+	protected BufferedReader createBufferedReader(final InputStream inputStream) {
+		return new BufferedReader(new InputStreamReader(inputStream));
+	}
+
+	/**
 	 * Reads the file and creates Admin objects with username and password.
 	 *
 	 * @return a list of Admin objects loaded from the file
@@ -42,7 +50,7 @@ public class AdminFileLoader implements AdminSourceLoader {
 	        throw new IOException("Error reading file: " + fileName);
 	    }
 
-	    try (BufferedReader buffer = new BufferedReader(new InputStreamReader(inputStream))) {
+	    try (BufferedReader buffer = createBufferedReader(inputStream)) {
 	        String line;
 	        while ((line = buffer.readLine()) != null) {
 	            String[] parts = line.split(",");
