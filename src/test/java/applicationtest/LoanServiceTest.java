@@ -420,4 +420,186 @@ class LoanServiceTest {
         List<Loan> list = loanService.findOverdueTestingModeLoans();
         assertEquals(1, list.size());
     }
+    
+    @Test
+    void addLoan_NullLoan_ShouldThrowException() {
+        LoanService ls = new LoanService();
+        assertThrows(IllegalArgumentException.class, () -> ls.addLoan(null));
+    }
+    
+    @Test
+    void borrow_NonExistingMember_ShouldThrow() {
+        Exception ex = assertThrows(IllegalArgumentException.class, 
+            () -> loanService.borrow("123456", "NOT_REAL"));
+
+        assertEquals("Member not found", ex.getMessage());
+    }
+    
+    @Test
+    void borrow_NonExistingBook_ShouldThrow2() {
+        Exception ex = assertThrows(IllegalArgumentException.class, 
+            () -> loanService.borrow("NO-ISBN", "Ali"));
+
+        assertEquals("Book not found", ex.getMessage());
+    }
+    
+    @Test
+    void borrow_BookAlreadyBorrowed_ShouldThrow2() {
+        loanService.borrow("123456", "Ali");
+        assertThrows(IllegalStateException.class, 
+            () -> loanService.borrow("123456", "Ali"));
+    }
+    
+    @Test
+    void returnBook_OverdueButMemberNull_ShouldNotThrow() {
+        loanService.borrow("123456", "Ali");
+
+        MemberRepository.clearMembers();
+
+        assertDoesNotThrow(() -> loanService.returnBook("123456", "Ali"));
+    }
+    
+    @Test
+    void returnBook_BookNotFound_ShouldNotThrow() {
+        loanService.borrow("123456", "Ali");
+        BookRepository.clearBooks();
+        assertDoesNotThrow(() -> loanService.returnBook("123456", "Ali"));
+    }
+
+    @Test
+    void countReturnedOn_NoMatches_ShouldReturnZero() {
+        LocalDate target = LocalDate.now();
+
+        Loan l = loanService.borrow("123456", "Ali");
+        // dueDate != target
+        assertEquals(0, loanService.countReturnedOn(target));
+    }
+    
+    @Test
+    void findLatestLoans_LimitZero_ShouldReturnEmpty() {
+        assertTrue(loanService.findLatestLoans(0).isEmpty());
+    }
+    
+    @Test
+    void getAllLoans_Empty_ShouldReturnEmpty() {
+        assertTrue(loanService.getAllLoans().isEmpty());
+    }
+    
+    @Test
+    void findOverdueLoans_NoneOverdue_ShouldReturnEmpty() {
+        loanService.borrow("123456", "Ali");
+        assertTrue(loanService.findOverdueLoans(LocalDate.now()).isEmpty());
+    }
+    
+    @Test
+    void hasActiveLoans_AllReturned_ShouldReturnFalse() {
+        loanService.borrow("123456", "Ali");
+        loanService.returnBook("123456", "Ali");
+        assertFalse(loanService.hasActiveLoans("Ali"));
+    }
+
+    @Test
+    void borrowMediaTestDuration_MemberNull_ShouldThrow() {
+        Media media = new Book("X", "A", "Z1");
+        assertThrows(IllegalArgumentException.class, () ->
+            loanService.borrowMediaTestDuration(null, media, LocalDate.now(), 1, 0, 0, 0)
+        );
+    }
+
+    @Test
+    void borrowMediaTestDuration_MediaNull_ShouldThrow() {
+        Member member = memberService.findMemberByEmail("Ali");
+        assertThrows(IllegalArgumentException.class, () ->
+            loanService.borrowMediaTestDuration(member, null, LocalDate.now(), 1, 0, 0, 0)
+        );
+    }
+
+    @Test
+    void borrowMediaTestDuration_NegativeSeconds_ShouldThrow() {
+        Member member = memberService.findMemberByEmail("Ali");
+        Media media = new Book("X", "A", "Z1");
+
+        assertThrows(IllegalArgumentException.class, () ->
+            loanService.borrowMediaTestDuration(member, media, LocalDate.now(), 0, 0, 0, -1)
+        );
+    }
+
+    @Test
+    void borrowMediaTestDuration_AllZero_ShouldThrow() {
+        Member member = memberService.findMemberByEmail("Ali");
+        Media media = new Book("X", "A", "Z1");
+
+        assertThrows(IllegalArgumentException.class, () ->
+            loanService.borrowMediaTestDuration(member, media, LocalDate.now(), 0, 0, 0, 0)
+        );
+    }
+
+    @Test
+    void borrowMediaTestDuration_MediaAlreadyBorrowed_ShouldThrow() {
+        Member member = memberService.findMemberByEmail("Ali");
+        Media media = new Book("X", "A", "Z1");
+
+        media.setBorrowed(true);
+
+        assertThrows(IllegalStateException.class, () ->
+            loanService.borrowMediaTestDuration(member, media, LocalDate.now(), 1, 0, 0, 0)
+        );
+    }
+    
+ // ================= TESTING: borrowMediaTestDuration (invalid cases) =================
+
+    @Test
+    void borrowMediaTestDuration_NullMember_ShouldThrow() {
+        Media media = new Book("B1", "A", "ID1");
+        assertThrows(IllegalArgumentException.class,
+                () -> loanService.borrowMediaTestDuration(null, media, LocalDate.now(), 1,1,1,1));
+    }
+
+    @Test
+    void borrowMediaTestDuration_NullMedia_ShouldThrow() {
+        Member m = new Member("Ali","pw");
+        assertThrows(IllegalArgumentException.class,
+                () -> loanService.borrowMediaTestDuration(m, null, LocalDate.now(), 1,1,1,1));
+    }
+
+    @Test
+    void borrowMediaTestDuration_NegativeDuration_ShouldThrow() {
+        Member m = new Member("Ali","pw");
+        Media media = new Book("B1","A","ID1");
+
+        assertThrows(IllegalArgumentException.class,
+                () -> loanService.borrowMediaTestDuration(m, media, LocalDate.now(), -1, 0, 0, 0));
+    }
+
+    @Test
+    void borrowMediaTestDuration_ZeroDuration_ShouldThrow() {
+        Member m = new Member("Ali","pw");
+        Media media = new Book("B1","A","ID1");
+
+        assertThrows(IllegalArgumentException.class,
+                () -> loanService.borrowMediaTestDuration(m, media, LocalDate.now(), 0, 0, 0, 0));
+    }
+
+    @Test
+    void borrowMediaTestDuration_AlreadyBorrowedMedia_ShouldThrow() {
+        Member m = new Member("Ali","pw");
+        Media media = new Book("B1","A","ID1");
+        media.setBorrowed(true);
+
+        assertThrows(IllegalStateException.class,
+                () -> loanService.borrowMediaTestDuration(m, media, LocalDate.now(), 1, 0, 0, 0));
+    }
+
+
+    
+
+
+
+
+
+
+
+
+
+
 }

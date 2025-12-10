@@ -279,4 +279,71 @@ class CDServiceTest {
         assertFalse(removed, "removeById should return false for non-existing id");
         assertNotNull(CDRepository.findById("CD-EXIST"), "Existing CD should remain");
     }
+    
+ // ================= borrowCD - invalid argument tests =================
+
+    @Test
+    void borrowCD_NullMember_ShouldThrow() {
+        CDRepository.addCD(new CD("X", "T", "A"));
+        assertThrows(IllegalArgumentException.class,
+                () -> cdService.borrowCD(null, "X", LocalDate.now()));
+    }
+
+    @Test
+    void borrowCD_BlankId_ShouldThrow() {
+        Member m = new Member("m","pw");
+        assertThrows(IllegalArgumentException.class,
+                () -> cdService.borrowCD(m, " ", LocalDate.now()));
+    }
+
+    @Test
+    void borrowCD_NullBorrowDate_ShouldThrow() {
+        Member m = new Member("m","pw");
+        CDRepository.addCD(new CD("Y","T","A"));
+        assertThrows(IllegalArgumentException.class,
+                () -> cdService.borrowCD(m, "Y", null));
+    }
+
+    @Test
+    void borrowCD_AlreadyBorrowed_ShouldThrow() {
+        Member m = new Member("m","pw");
+        CD cd = new CD("CD-777","T","A");
+        cd.setBorrowed(true);
+        CDRepository.addCD(cd);
+
+        assertThrows(IllegalStateException.class,
+                () -> cdService.borrowCD(m, "CD-777", LocalDate.now()));
+    }
+
+    // ================= returnCD - invalid argument tests =================
+
+    @Test
+    void returnCD_NullMember_ShouldThrow() {
+        assertThrows(IllegalArgumentException.class,
+                () -> cdService.returnCD(null, "A1", LocalDate.now()));
+    }
+
+    @Test
+    void returnCD_BlankId_ShouldThrow() {
+        Member m = new Member("m","pw");
+        assertThrows(IllegalArgumentException.class,
+                () -> cdService.returnCD(m, " ", LocalDate.now()));
+    }
+
+    @Test
+    void returnCD_NullReturnDate_ShouldThrow() {
+        Member m = new Member("m","pw");
+        assertThrows(IllegalArgumentException.class,
+                () -> cdService.returnCD(m, "A1", null));
+    }
+
+    @Test
+    void returnCD_NoActiveLoan_ShouldThrow() {
+        Member m = new Member("m","pw");
+        CDRepository.addCD(new CD("A1","T","A"));
+
+        assertThrows(IllegalArgumentException.class,
+                () -> cdService.returnCD(m, "A1", LocalDate.now()));
+    }
+
 }
