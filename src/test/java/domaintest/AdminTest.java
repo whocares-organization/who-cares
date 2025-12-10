@@ -1,4 +1,4 @@
-/*package domaintest;
+package domaintest;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -93,4 +93,3 @@ class AdminTest {
         assertNull(defaultAdmin.getStatus(), "Status should be null by default");
     }
 }
-*/

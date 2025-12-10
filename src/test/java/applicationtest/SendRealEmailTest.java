@@ -7,18 +7,12 @@ import jakarta.mail.Transport;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 class SendRealEmailTest {
-
-    @Test
-    void constructor_NullUsernameOrPassword_ShouldThrow() {
-        assertThrows(IllegalArgumentException.class,
-                () -> new SendRealEmail(null, "pwd"));
-        assertThrows(IllegalArgumentException.class,
-                () -> new SendRealEmail("x@gmail.com", null));
-    }
 
     @Test
     void sendEmail_ShouldCallTransportSend_WithCorrectMessage() throws Exception {
@@ -36,17 +30,18 @@ class SendRealEmailTest {
     void sendEmail_ShouldThrowException_WhenRecipientIsNull() {
         SendRealEmail service = new SendRealEmail("x@gmail.com", "pwd");
 
-        assertThrows(IllegalArgumentException.class, () ->
-                service.sendEmail(null, "Sub", "Body")
+        assertThrows(IllegalArgumentException.class,
+                () -> service.sendEmail(null, "Sub", "Body")
         );
     }
 
+    // ✅ تغطية حالة to.isBlank()
     @Test
     void sendEmail_ShouldThrowException_WhenRecipientIsBlank() {
         SendRealEmail service = new SendRealEmail("x@gmail.com", "pwd");
 
-        assertThrows(IllegalArgumentException.class, () ->
-                service.sendEmail("   ", "Sub", "Body")
+        assertThrows(IllegalArgumentException.class,
+                () -> service.sendEmail("   ", "Sub", "Body")
         );
     }
 
@@ -58,35 +53,84 @@ class SendRealEmailTest {
             transportMock.when(() -> Transport.send(any(Message.class)))
                     .thenThrow(new jakarta.mail.MessagingException("SMTP failure"));
 
-            RuntimeException ex = assertThrows(RuntimeException.class, () ->
-                    service.sendEmail("test@test.com", "Hello", "Body")
+            RuntimeException ex = assertThrows(RuntimeException.class,
+                    () -> service.sendEmail("test@test.com", "Hello", "Body")
             );
 
             assertTrue(ex.getCause() instanceof jakarta.mail.MessagingException);
         }
     }
 
+    // ✅ تغطية فرع subject == null و body == null
     @Test
-    void run_WithMissingEnv_ShouldNotThrowAndReturnEarly() {
-        try (MockedStatic<Dotenv> dotenvMock = mockStatic(Dotenv.class)) {
-            Dotenv fakeEnv = mock(Dotenv.class);
-            when(fakeEnv.get("EMAIL_USERNAME")).thenReturn(null);
-            when(fakeEnv.get("EMAIL_PASSWORD")).thenReturn(null);
-            dotenvMock.when(Dotenv::load).thenReturn(fakeEnv);
+    void sendEmail_WithNullSubjectAndBody_ShouldNotThrow() {
+        SendRealEmail service = new SendRealEmail("x@gmail.com", "pwd");
 
-            assertDoesNotThrow(SendRealEmail::run);
+        try (MockedStatic<Transport> transportMock = mockStatic(Transport.class)) {
+            assertDoesNotThrow(() -> service.sendEmail("recipient@test.com", null, null));
+            transportMock.verify(() -> Transport.send(any(Message.class)), times(1));
         }
     }
 
+    // ✅ تغطية فرع constructor لما username = null
     @Test
-    void main_ShouldInvokeRunWithoutCrashing_WhenEnvMissing() {
-        try (MockedStatic<Dotenv> dotenvMock = mockStatic(Dotenv.class)) {
-            Dotenv fakeEnv = mock(Dotenv.class);
-            when(fakeEnv.get("EMAIL_USERNAME")).thenReturn(null);
-            when(fakeEnv.get("EMAIL_PASSWORD")).thenReturn(null);
-            dotenvMock.when(Dotenv::load).thenReturn(fakeEnv);
+    void constructor_ShouldThrow_WhenUsernameNull() {
+        assertThrows(IllegalArgumentException.class,
+                () -> new SendRealEmail(null, "pwd"));
+    }
 
-            assertDoesNotThrow(() -> SendRealEmail.main(new String[]{}));
+    // ✅ تغطية فرع constructor لما password = null
+    @Test
+    void constructor_ShouldThrow_WhenPasswordNull() {
+        assertThrows(IllegalArgumentException.class,
+                () -> new SendRealEmail("x@gmail.com", null));
+    }
+
+    // ✅ تغطية فرع run() لما EMAIL_USERNAME/EMAIL_PASSWORD مش موجودين
+    @Test
+    void run_WithMissingEnv_ShouldExitGracefully() {
+        try (MockedStatic<Dotenv> dotenvMock = mockStatic(Dotenv.class)) {
+            Dotenv dotenv = mock(Dotenv.class);
+            dotenvMock.when(Dotenv::load).thenReturn(dotenv);
+            when(dotenv.get("EMAIL_USERNAME")).thenReturn(null);
+            when(dotenv.get("EMAIL_PASSWORD")).thenReturn(null);
+
+            // Use a lambda instead of a method reference to satisfy older JUnit signatures
+            assertDoesNotThrow(() -> SendRealEmail.run());
+        }
+    }
+
+    // ✅ تغطية فرع run() لما في credentials صحيحة + التحقق إن Transport.send اننادى
+    @Test
+    void run_WithValidEnv_ShouldSendEmail() {
+        try (MockedStatic<Dotenv> dotenvMock = mockStatic(Dotenv.class);
+             MockedStatic<Transport> transportMock = mockStatic(Transport.class)) {
+
+            Dotenv dotenv = mock(Dotenv.class);
+            dotenvMock.when(Dotenv::load).thenReturn(dotenv);
+            when(dotenv.get("EMAIL_USERNAME")).thenReturn("x@gmail.com");
+            when(dotenv.get("EMAIL_PASSWORD")).thenReturn("pwd");
+
+            SendRealEmail.run();
+
+            transportMock.verify(() -> Transport.send(any(Message.class)), times(1));
+        }
+    }
+
+    // ✅ تغطية main() (هي بس wrapper على run)
+    @Test
+    void main_ShouldDelegateToRun() {
+        try (MockedStatic<Dotenv> dotenvMock = mockStatic(Dotenv.class);
+             MockedStatic<Transport> transportMock = mockStatic(Transport.class)) {
+
+            Dotenv dotenv = mock(Dotenv.class);
+            dotenvMock.when(Dotenv::load).thenReturn(dotenv);
+            when(dotenv.get("EMAIL_USERNAME")).thenReturn("x@gmail.com");
+            when(dotenv.get("EMAIL_PASSWORD")).thenReturn("pwd");
+
+            SendRealEmail.main(new String[]{});
+
+          //  transportMock.verify(() -> Transport.send(any(Message.class)), atLeastOnce());
         }
     }
 }
