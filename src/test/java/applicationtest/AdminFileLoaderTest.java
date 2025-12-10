@@ -6,6 +6,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.StringReader;
 import java.util.List;
 
 import org.junit.jupiter.api.AfterAll;
@@ -31,10 +32,10 @@ class AdminFileLoaderTest {
 
         @Override
         protected BufferedReader createBufferedReader(final InputStream inputStream) {
-            return new BufferedReader(new InputStreamReader(inputStream)) {
+            // Return a BufferedReader whose readLine always throws IOException
+            return new BufferedReader(new StringReader("")) {
                 @Override
                 public String readLine() throws IOException {
-                    // Simulate an I/O error during reading
                     throw new IOException("Simulated read error");
                 }
             };
