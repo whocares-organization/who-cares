@@ -70,10 +70,33 @@ class OverdueEmailObserverTest {
         String subject = subjectCap.getValue();
         String body = bodyCap.getValue();
 
-        assertTrue(subject.contains("Overdue") || subject.contains("Library"), "Subject should reference overdue context");
+        assertTrue(subject.contains("Overdue") || subject.contains("Library"),
+                "Subject should reference overdue context");
         assertTrue(body.contains(isbn), "Body should contain ISBN");
         assertTrue(body.contains(userEmail), "Body should contain member email");
-        assertTrue(body.matches(".*fine.*\\d+(\\.\\d+)?"), "Body should mention fine amount");
+        assertTrue(body.matches(".*fine.*\\d+(\\.\\d+)?"),
+                "Body should mention fine amount");
+    }
+    // ===============================================================
+
+    // ================= Extra Coverage Tests ========================
+
+    @Test
+    void constructor_WithNullEmailService_ShouldThrowIllegalArgumentException() {
+        IllegalArgumentException ex = assertThrows(
+                IllegalArgumentException.class,
+                () -> new OverdueEmailObserver(null)
+        );
+        assertEquals("EmailService cannot be null", ex.getMessage());
+    }
+
+    @Test
+    void update_WithNonLoanPayload_ShouldNotSendEmail() {
+        OverdueEmailObserver observer = new OverdueEmailObserver(emailService);
+
+        observer.update(loanService, "NOT_A_LOAN_OBJECT");
+
+        verify(emailService, never()).sendEmail(anyString(), anyString(), anyString());
     }
     // ===============================================================
 }

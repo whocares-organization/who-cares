@@ -36,7 +36,7 @@ public class Admin extends Person {
      * @param phone the administrator's phone number
      */
     public Admin(String userName, String password, String name, String id, String phone) {
-       super(userName, password, name, id, phone);
+        super(userName, password, name, id, phone);
     }
 
     /**

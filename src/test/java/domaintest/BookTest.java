@@ -1,4 +1,4 @@
-/*package domaintest;
+package domaintest;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -66,4 +66,4 @@ class BookTest {
         assertTrue(str.contains("123456"));
         assertTrue(str.contains("Book"));
     }
-}*/
+}
