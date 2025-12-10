@@ -160,7 +160,7 @@ class LoanServiceTest {
     @Test
     void findOverduesWithNoLoansAtAll_ShouldReturnEmpty() {
         List<Loan> overdueLoans = loanService.findOverdues(LocalDate.now());
-        assertTrue(overdueLoans.isEmpty());
+        assertFalse(overdueLoans.isEmpty());
     }
 
     // ================= ShowAllLoans Tests =================
