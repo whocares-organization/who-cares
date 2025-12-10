@@ -31,7 +31,7 @@ class LoanServiceTest {
 
     // ================= Setup & Teardown =================
     @BeforeEach
-    void setUp() throws Exception {
+    void setUp(){
         memberService = new MemberService();
         bookService = new BookService();
         loanService = new LoanService();
@@ -41,7 +41,7 @@ class LoanServiceTest {
     }
 
     @AfterEach
-    void tearDown() throws Exception {
+    void tearDown(){
         BookRepository.clearBooks();
         MemberRepository.clearMembers();
         LoanRepository.clearLoans();

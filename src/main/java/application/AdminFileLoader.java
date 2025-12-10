@@ -15,18 +15,26 @@ import java.util.List;
  * Implements AdminSourceLoader to read CSV/text files with username,password.
  */
 public class AdminFileLoader implements AdminSourceLoader {
+	
+	private static final Logger LOGGER = Logger.getLogger(AdminFileLoader.class.getName());
+	private final String fileName;
 
-    private static final Logger LOGGER = Logger.getLogger(AdminFileLoader.class.getName());
-    private final String fileName;
+	/**
+	 * Creates a new loader that reads admin records from a classpath resource.
+	 *
+	 * @param fileName the resource name to load (e.g., "admins.csv")
+	 */
+	public AdminFileLoader(final String fileName) {
+	    this.fileName = fileName;
+	}
 
-    /**
-     * Creates a new loader that reads admin records from a classpath resource.
-     *
-     * @param fileName the resource name to load (e.g., "admins.csv")
-     */
-    public AdminFileLoader(final String fileName) {
-        this.fileName = fileName;
-    }
+	/**
+	 * Factory method extracted to allow overriding in tests.
+	 * Creates a BufferedReader for the given InputStream.
+	 */
+	protected BufferedReader createBufferedReader(final InputStream inputStream) {
+		return new BufferedReader(new InputStreamReader(inputStream));
+	}
 
     /**
      * Reads the file and creates Admin objects with username and password.

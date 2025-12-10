@@ -157,4 +157,42 @@ class TestingModeLoanWatcherTest {
 
         verify(mockEmail, never()).sendEmail(anyString(), anyString(), anyString());
     }
+    
+    @Test
+    void ctor_WithNullLoanService_ShouldThrow() {
+        assertThrows(IllegalArgumentException.class,
+                () -> new TestingModeLoanWatcher(null, emailService));
+    }
+    
+    @Test
+    void ctor_WithNullEmailService_ShouldThrow() {
+        assertThrows(IllegalArgumentException.class,
+                () -> new TestingModeLoanWatcher(loanService, null));
+    }
+
+    @Test
+    void start_WhenAlreadyRunning_ShouldNotCreateNewThread() throws Exception {
+        TestingModeLoanWatcher w = new TestingModeLoanWatcher(loanService, emailService, 1000);
+        w.start();
+
+        var f = TestingModeLoanWatcher.class.getDeclaredField("thread");
+        f.setAccessible(true);
+        Thread first = (Thread) f.get(w);
+
+        w.start();
+        Thread second = (Thread) f.get(w);
+
+        assertSame(first, second);
+        w.stop();
+    }
+
+    @Test
+    void stop_WhenThreadNull_ShouldNotThrow() {
+        TestingModeLoanWatcher w = new TestingModeLoanWatcher(loanService, emailService, 1000);
+        assertDoesNotThrow(w::stop);
+    }
+
+ 
+
+
 }

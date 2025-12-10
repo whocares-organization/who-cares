@@ -8,9 +8,14 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 
+import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.Collections;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import domain.Loan;
 import domain.Member;
 import domain.Loan;
 
@@ -21,8 +26,12 @@ class MemberTest {
     @BeforeEach
     void setUp() {
         member = new Member("user1", "12345");
+        member.setId("ID001"); // Needed for calculateTotalFines matching
     }
 
+    // ================================
+    // Constructors
+    // ================================
     @Test
     void testDefaultConstructor() {
         Member m = new Member();
@@ -57,6 +66,9 @@ class MemberTest {
         assertEquals(0.0, m.getFineBalance());
     }
 
+    // ================================
+    // Fine Balance
+    // ================================
     @Test
     void testSetAndGetFineBalance() {
         member.setFineBalance(50.0);
@@ -91,6 +103,9 @@ class MemberTest {
         assertThrows(IllegalArgumentException.class, () -> member.payMemberFine(-10));
     }
 
+    // ================================
+    // Borrow Eligibility
+    // ================================
     @Test
     void testCanBorrow() {
         assertTrue(member.canBorrow());
@@ -98,6 +113,9 @@ class MemberTest {
         assertFalse(member.canBorrow());
     }
 
+    // ================================
+    // toString()
+    // ================================
     @Test
     void testToString() {
         member.setName("Ali");

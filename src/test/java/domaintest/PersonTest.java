@@ -10,6 +10,19 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import domain.Person;
+import domain.UserStatus;
+
+// A simple concrete subclass since Person is abstract
+class TestPerson extends Person {
+    public TestPerson() { super(); }
+    public TestPerson(String user, String pass) { super(user, pass); }
+    public TestPerson(String id, String user, String pass) { super(id, user, pass); }
+    public TestPerson(String user, String pass, String name, String id, String phone) {
+        super(user, pass, name, id, phone);
+    }
+}
+
 class PersonTest {
 
     // Concrete subclass عشان نقدر نختبر كلاس Person (لأنه abstract)
@@ -31,19 +44,62 @@ class PersonTest {
     @BeforeAll
     static void setUpBeforeClass() throws Exception {}
 
-    @AfterAll
-    static void tearDownAfterClass() throws Exception {}
+    @Test
+    void testNameSetterGetter() {
+        Person p = new TestPerson();
+        p.setName("Sara");
+        assertEquals("Sara", p.getName());
+    }
 
-    @BeforeEach
-    void setUp() throws Exception {}
+    @Test
+    void testIdSetterGetter() {
+        Person p = new TestPerson();
+        p.setId("X001");
+        assertEquals("X001", p.getId());
+    }
 
-    @AfterEach
-    void tearDown() throws Exception {}
+    @Test
+    void testPhoneSetterGetter() {
+        Person p = new TestPerson();
+        p.setPhone("0591234567");
+        assertEquals("0591234567", p.getPhone());
+    }
+
+    @Test
+    void testCreatedAtSetterGetter() {
+        Person p = new TestPerson();
+        p.setCreatedAt("2025-01-01");
+        assertEquals("2025-01-01", p.getCreatedAt());
+    }
+
+    @Test
+    void testStatusSetterGetter() {
+        Person p = new TestPerson();
+        p.setStatus(UserStatus.ONLINE);
+        assertEquals(UserStatus.ONLINE, p.getStatus());
+    }
+
+    // =============================
+    // checkPassword()
+    // =============================
+
+    @Test
+    void testCheckPassword_TrueWhenMatch() {
+        Person p = new TestPerson("user", "secret");
+        assertTrue(p.checkPassword("secret"));
+    }
+
+    @Test
+    void testCheckPassword_FalseWhenMismatch() {
+        Person p = new TestPerson("user", "secret");
+        assertFalse(p.checkPassword("wrong"));
+    }
 
     // التست الأصلي - خليته زي ما هو
     @Test
-    void placeholder() {
-        assertTrue(true);
+    void testCheckPassword_FalseWhenPasswordNull() {
+        Person p = new TestPerson("user", null);
+        assertFalse(p.checkPassword("anything"));
     }
 
     @Test
