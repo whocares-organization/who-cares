@@ -15,6 +15,10 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/x
     <maven.compiler.target>17</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <javafx.version>21.0.4</javafx.version>
+
+    <sonar.organization>whocares-organization</sonar.organization>
+    <sonar.projectKey>whocares-organization_who-cares</sonar.projectKey>
+    <sonar.host.url>https://sonarcloud.io</sonar.host.url>
   </properties>
 
   <!-- ======================== -->
@@ -130,7 +134,8 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/x
         <version>3.1.2</version>
         <configuration>
           <useModulePath>false</useModulePath>
-          <argLine>--add-opens java.base/java.lang=ALL-UNNAMED</argLine>
+          
+          <argLine>${jacocoArgLine} --add-opens java.base/java.lang=ALL-UNNAMED</argLine>
         </configuration>
       </plugin>
 
@@ -152,11 +157,17 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/x
         <artifactId>jacoco-maven-plugin</artifactId>
         <version>0.8.12</version>
         <executions>
+
           <execution>
             <goals>
               <goal>prepare-agent</goal>
             </goals>
+            <configuration>
+              <propertyName>jacocoArgLine</propertyName>
+            </configuration>
           </execution>
+
+          <!-- يطلع تقارير JaCoCo (XML + HTML) بعد الـ verify -->
           <execution>
             <id>report</id>
             <phase>verify</phase>
@@ -164,12 +175,16 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/x
               <goal>report</goal>
             </goals>
             <configuration>
+              <reports>
+                <xml>true</xml>
+                <csv>false</csv>
+                <html>true</html>
+              </reports>
               <excludes>
                 <!-- Exclude Presentation Layer from Coverage -->
-                 
-                    <exclude>presentation/**</exclude>
-                    <exclude>**/presentation/**</exclude>
-                    <exclude>src/main/java/presentation/**</exclude>
+                <exclude>presentation/**</exclude>
+                <exclude>**/presentation/**</exclude>
+                <exclude>src/main/java/presentation/**</exclude>
               </excludes>
             </configuration>
           </execution>

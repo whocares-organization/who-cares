@@ -12,7 +12,6 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Observable;
 import java.util.logging.Logger;
@@ -42,7 +41,7 @@ public class LoanService extends Observable {
         this.borrowingRules = new BorrowingRules();
         this.loanRepository = new LoanRepository();
     }
-    
+
     /**
      * Creates a service with a provided repository and default rules.
      *
@@ -84,7 +83,7 @@ public class LoanService extends Observable {
         LOGGER.info("Book borrowed successfully! Due date: " + loan.getDueDate());
         return loan;
     }
-    
+
     /**
      * Saves a loan in the repository.
      *
@@ -183,7 +182,7 @@ public class LoanService extends Observable {
                         + (l.isOverdue(today) ? " | OVERDUE" : "")
         ));
     }
-    
+
     /**
      * Returns overdue loans for a specific member as of a date.
      *
@@ -217,7 +216,7 @@ public class LoanService extends Observable {
             throw new IllegalStateException("Book is already borrowed");
         }
     }
-    
+
     /**
      * Counts active loans in the repository.
      *
@@ -235,8 +234,8 @@ public class LoanService extends Observable {
      */
     public int countReturnedOn(LocalDate date) {
         return (int) loanRepository.findAll().stream()
-            .filter(l -> l.isReturned() && l.getDueDate().equals(date))
-            .count();
+                .filter(l -> l.isReturned() && l.getDueDate().equals(date))
+                .count();
     }
 
     /**
@@ -247,9 +246,9 @@ public class LoanService extends Observable {
      */
     public List<Loan> findLatestLoans(int limit) {
         return loanRepository.findAll().stream()
-            .sorted((a,b)-> b.getBorrowDate().compareTo(a.getBorrowDate()))
-            .limit(limit)
-            .toList();
+                .sorted((a, b) -> b.getBorrowDate().compareTo(a.getBorrowDate()))
+                .limit(limit)
+                .toList();
     }
 
     /**
@@ -270,7 +269,7 @@ public class LoanService extends Observable {
     public List<Loan> findOverdueLoans(LocalDate date) {
         return loanRepository.findAllActiveOverdue(date);
     }
-    
+
     /**
      * Indicates whether a member has active loans.
      *
@@ -385,7 +384,7 @@ public class LoanService extends Observable {
         double total = 0.0;
         for (Loan loan : loanRepository.findAll()) {
             if (loan.getMemberId() != null &&
-                loan.getMemberId().equals(member.getUserName())) {
+                    loan.getMemberId().equals(member.getUserName())) {
                 loan.calculateFine(today);
                 total += loan.getFineAmount();
             }
@@ -429,9 +428,9 @@ public class LoanService extends Observable {
         }
         long totalSeconds =
                 (long) days * 24 * 60 * 60 +
-                (long) hours * 60 * 60 +
-                (long) minutes * 60 +
-                (long) seconds;
+                        (long) hours * 60 * 60 +
+                        (long) minutes * 60 +
+                        (long) seconds;
         long daysPortion = totalSeconds / (24 * 60 * 60);
         long leftover = totalSeconds % (24 * 60 * 60);
         LocalDate dueDate = borrowDate.plusDays(daysPortion + (leftover > 0 ? 1 : 0));

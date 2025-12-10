@@ -409,5 +409,23 @@ class AdminActionsTest {
         assertEquals("Valid member is required.", ex.getMessage());
     }
 
+    @Test
+    void sendRealEmailToMember_ShouldDelegateToEmailService() {
+        EmailService email = mock(EmailService.class);
+
+        AdminActions actions = new AdminActions(
+                new MemberService(new MemberRepository()),
+                new LoanService(new BorrowingRules(), new LoanRepository()),
+                email
+        );
+
+        Member m = new Member("user602@example.com", "pw");
+
+        actions.sendRealEmailToMember(existingAdmin, m, "Hello", "Real body");
+
+        verify(email, times(1))
+                .sendEmail("user602@example.com", "Hello", "Real body");
+    }
+
 
 }
