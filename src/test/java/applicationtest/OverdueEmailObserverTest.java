@@ -76,4 +76,33 @@ class OverdueEmailObserverTest {
         assertTrue(body.matches(".*fine.*\\d+(\\.\\d+)?"), "Body should mention fine amount");
     }
     // ===============================================================
+    
+    @Test
+    void ctor_WithNullEmailService_ShouldThrow() {
+        assertThrows(IllegalArgumentException.class,
+                () -> new OverdueEmailObserver(null));
+    }
+
+    
+    @Test
+    void update_WithNullArgument_ShouldNotSendEmail() {
+        OverdueEmailObserver obs = new OverdueEmailObserver(emailService);
+        obs.update(null, null);
+        verify(emailService, never()).sendEmail(any(), any(), any());
+    }
+
+    @Test
+    void update_WithNonLoanArgument_ShouldNotSendEmail() {
+        OverdueEmailObserver obs = new OverdueEmailObserver(emailService);
+        obs.update(null, "not-a-loan");
+        verify(emailService, never()).sendEmail(any(), any(), any());
+    }
+
+    @Test
+    void update_WithUnexpectedObject_ShouldNotSendEmail() {
+        OverdueEmailObserver obs = new OverdueEmailObserver(emailService);
+        obs.update(null, new Object());
+        verify(emailService, never()).sendEmail(any(), any(), any());
+    }
+
 }
