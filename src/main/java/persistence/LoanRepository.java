@@ -47,7 +47,7 @@ public class LoanRepository {
     public static List<Loan> findAllActive() {
         return loans.stream()
                 .filter(l -> !l.isReturned())
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**
@@ -81,7 +81,7 @@ public class LoanRepository {
     public static List<Loan> findActiveByMember(String memberId) {
         return loans.stream()
                 .filter(l -> !l.isReturned() && l.getMemberId().equals(memberId))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**
@@ -149,7 +149,7 @@ public class LoanRepository {
      * @param today    the reference date used to determine whether a loan is overdue
      * @return a list of the member's active overdue loans as of {@code today} (never null)
      */
-    public List<Loan> findActiveOverdueByMember(String memberId, LocalDate today) {
+    public static List<Loan> findActiveOverdueByMember(String memberId, LocalDate today) {
         return loans.stream()
                 .filter(l -> !l.isReturned()
                         && memberId != null
