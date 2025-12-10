@@ -4,7 +4,6 @@ import domain.Member;
 import domain.UserStatus;
 import persistence.MemberRepository;
 
-import java.util.List;
 import java.util.logging.Logger;
 
 /**

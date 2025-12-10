@@ -46,7 +46,7 @@ public abstract class Person {
      * Default no-argument constructor.
      * Initializes an empty {@code Person} instance.
      */
-    public Person() {}
+    protected Person() {}
 
     /**
      * Constructs a new {@code Person} with the specified username and password.

@@ -1,6 +1,5 @@
 package domain;
 
-import java.time.LocalDate;
 
 /**
  * Represents a book in the library system.
