@@ -7,6 +7,8 @@ import jakarta.mail.Transport;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -74,7 +76,8 @@ class SendRealEmailTest {
             when(fakeEnv.get("EMAIL_PASSWORD")).thenReturn(null);
             dotenvMock.when(Dotenv::load).thenReturn(fakeEnv);
 
-            assertDoesNotThrow(SendRealEmail::run);
+            // Use a lambda instead of a method reference to satisfy older JUnit signatures
+            assertDoesNotThrow(() -> SendRealEmail.run());
         }
     }
 

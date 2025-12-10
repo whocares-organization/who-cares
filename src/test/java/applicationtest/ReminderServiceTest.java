@@ -65,4 +65,28 @@ class ReminderServiceTest {
         assertNull(reminderService.sendReminderToSpecificMember(null));
         verify(emailService, never()).sendEmail(anyString(), anyString(), anyString());
     }
+    
+    @Test
+    void sendReminderToSpecificMember_UserNameNull_ReturnsNull() {
+        Member invalid = new Member("x@example.com", "pw");
+        invalid.setUserName(null);
+        memberService.registerMember(invalid);
+
+        assertNull(reminderService.sendReminderToSpecificMember(invalid));
+        verify(emailService, never()).sendEmail(anyString(), anyString(), anyString());
+    }
+
+    @Test
+    void sendReminderToSpecificMember_BlankUserName_ReturnsNull() {
+        Member invalid = new Member("blank@example.com", "pw");
+        invalid.setUserName("   ");
+        memberService.registerMember(invalid);
+
+        assertNull(reminderService.sendReminderToSpecificMember(invalid));
+        verify(emailService, never()).sendEmail(anyString(), anyString(), anyString());
+    }
+
+   
+
+    
 }

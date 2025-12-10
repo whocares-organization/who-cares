@@ -109,6 +109,6 @@ public class SendRealEmail implements EmailService {
      * @param args command-line arguments (unused)
      */
     public static void main(String[] args) {
-        run();
+        //run();
     }
 }
