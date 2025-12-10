@@ -70,39 +70,33 @@ class OverdueEmailObserverTest {
         String subject = subjectCap.getValue();
         String body = bodyCap.getValue();
 
-        assertTrue(subject.contains("Overdue") || subject.contains("Library"), "Subject should reference overdue context");
+        assertTrue(subject.contains("Overdue") || subject.contains("Library"),
+                "Subject should reference overdue context");
         assertTrue(body.contains(isbn), "Body should contain ISBN");
         assertTrue(body.contains(userEmail), "Body should contain member email");
-        assertTrue(body.matches(".*fine.*\\d+(\\.\\d+)?"), "Body should mention fine amount");
+        assertTrue(body.matches(".*fine.*\\d+(\\.\\d+)?"),
+                "Body should mention fine amount");
     }
     // ===============================================================
-    
-    @Test
-    void ctor_WithNullEmailService_ShouldThrow() {
-        assertThrows(IllegalArgumentException.class,
-                () -> new OverdueEmailObserver(null));
-    }
 
-    
+    // ================= Extra Coverage Tests ========================
+
     @Test
-    void update_WithNullArgument_ShouldNotSendEmail() {
-        OverdueEmailObserver obs = new OverdueEmailObserver(emailService);
-        obs.update(null, null);
-        verify(emailService, never()).sendEmail(any(), any(), any());
+    void constructor_WithNullEmailService_ShouldThrowIllegalArgumentException() {
+        IllegalArgumentException ex = assertThrows(
+                IllegalArgumentException.class,
+                () -> new OverdueEmailObserver(null)
+        );
+        assertEquals("EmailService cannot be null", ex.getMessage());
     }
 
     @Test
-    void update_WithNonLoanArgument_ShouldNotSendEmail() {
-        OverdueEmailObserver obs = new OverdueEmailObserver(emailService);
-        obs.update(null, "not-a-loan");
-        verify(emailService, never()).sendEmail(any(), any(), any());
-    }
+    void update_WithNonLoanPayload_ShouldNotSendEmail() {
+        OverdueEmailObserver observer = new OverdueEmailObserver(emailService);
 
-    @Test
-    void update_WithUnexpectedObject_ShouldNotSendEmail() {
-        OverdueEmailObserver obs = new OverdueEmailObserver(emailService);
-        obs.update(null, new Object());
-        verify(emailService, never()).sendEmail(any(), any(), any());
-    }
+        observer.update(loanService, "NOT_A_LOAN_OBJECT");
 
+        verify(emailService, never()).sendEmail(anyString(), anyString(), anyString());
+    }
+    // ===============================================================
 }

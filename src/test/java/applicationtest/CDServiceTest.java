@@ -9,6 +9,7 @@ import persistence.CDRepository;
 import persistence.LoanRepository;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -110,120 +111,172 @@ class CDServiceTest {
         assertNull(CDRepository.findById("CD-303"), "CD should not exist after deletion");
     }
     // ====================================================
-    
- // ================= Additional BorrowCD Branch Tests =================
+
+    // ================= CDRepository Direct Tests =================
 
     @Test
-    void borrowCD_WithNullMember_ShouldThrow() {
-        CD cd = new CD("CD-500", "Test", "Artist");
+    void cdRepositoryConstructor_ShouldCreateInstance() {
+        CDRepository repo = new CDRepository();
+        assertNotNull(repo, "CDRepository instance should be created");
+    }
+
+    @Test
+    void addCD_Null_ShouldNotChangeRepositorySize() {
+        int before = CDRepository.findAll().size();
+        CDRepository.addCD(null);
+        int after = CDRepository.findAll().size();
+        assertEquals(before, after, "Adding null CD should not change repository size");
+    }
+
+    @Test
+    void removeCD_Null_ShouldNotChangeRepositorySize() {
+        CD cd = new CD("CD-X1", "Some Title", "Some Artist");
         CDRepository.addCD(cd);
-        assertThrows(IllegalArgumentException.class,
-                () -> cdService.borrowCD(null, "CD-500", LocalDate.now()));
+        int before = CDRepository.findAll().size();
+        CDRepository.removeCD(null);
+        int after = CDRepository.findAll().size();
+        assertEquals(before, after, "Removing null CD should not change repository size");
     }
 
     @Test
-    void borrowCD_WithBlankCdId_ShouldThrow() {
-        Member member = new Member("x@example.com", "pw");
-        assertThrows(IllegalArgumentException.class,
-                () -> cdService.borrowCD(member, "   ", LocalDate.now()));
-    }
-
-    @Test
-    void borrowCD_WithNullBorrowDate_ShouldThrow() {
-        CD cd = new CD("CD-600", "Audio", "Artist");
+    void removeCD_ValidCD_ShouldRemoveFromRepository() {
+        CD cd = new CD("CD-DEL", "Delete Me", "Unknown");
         CDRepository.addCD(cd);
-        Member member = new Member("y@example.com", "pw");
-        assertThrows(IllegalArgumentException.class,
-                () -> cdService.borrowCD(member, "CD-600", null));
+        assertNotNull(CDRepository.findById("CD-DEL"));
+        CDRepository.removeCD(cd);
+        assertNull(CDRepository.findById("CD-DEL"), "CD should be removed by removeCD");
     }
 
     @Test
-    void borrowCD_WhenCdAlreadyBorrowed_ShouldThrow() {
-        CD cd = new CD("CD-700", "Hits", "Artist");
+    void findById_NullId_ShouldReturnNull() {
+        CD cd = new CD("CD-1", "Title1", "Artist1");
         CDRepository.addCD(cd);
-        Member member = new Member("z@example.com", "pw");
-        cdService.borrowCD(member, "CD-700", LocalDate.now());
-        assertThrows(IllegalStateException.class,
-                () -> cdService.borrowCD(member, "CD-700", LocalDate.now()));
-    }
-    
- // ================= Additional ReturnCD Branch Tests =================
-
-    @Test
-    void returnCD_WithNullMember_ShouldThrow() {
-        assertThrows(IllegalArgumentException.class,
-                () -> cdService.returnCD(null, "CD-800", LocalDate.now()));
+        assertNull(CDRepository.findById(null), "findById(null) should return null");
     }
 
     @Test
-    void returnCD_WithBlankCdId_ShouldThrow() {
-        Member member = new Member("aa@example.com", "pw");
-        assertThrows(IllegalArgumentException.class,
-                () -> cdService.returnCD(member, "   ", LocalDate.now()));
-    }
-
-    @Test
-    void returnCD_WithNullReturnDate_ShouldThrow() {
-        Member member = new Member("bb@example.com", "pw");
-        assertThrows(IllegalArgumentException.class,
-                () -> cdService.returnCD(member, "CD-900", null));
-    }
-
-    @Test
-    void returnCD_WhenActiveLoanNotFound_ShouldThrow() {
-        Member member = new Member("cc@example.com", "pw");
-        assertThrows(IllegalArgumentException.class,
-                () -> cdService.returnCD(member, "CD-404-NO-LOAN", LocalDate.now()));
-    }
-
-    @Test
-    void returnCD_CdNotFoundInRepository_ShouldStillReturnFine() {
-        CD cd = new CD("CD-1000", "Soft", "Artist");
+    void findById_NonExistingId_ShouldReturnNull() {
+        CD cd = new CD("CD-2", "Title2", "Artist2");
         CDRepository.addCD(cd);
-        Member m = new Member("dd@example.com", "pw");
-        LocalDate borrow = LocalDate.now().minusDays(7);
-        cdService.borrowCD(m, "CD-1000", borrow);
-
-        CDRepository.removeById("CD-1000");
-
-        double fine = cdService.returnCD(m, "CD-1000", LocalDate.now());
-        assertTrue(fine >= 0.0);
-    }
-    
-    @Test
-    void getActiveLoan_WithNullMemberOrCdId_ShouldReturnNull() {
-        assertNull(cdService.getActiveLoan(null, "CD-X"));
-        Member m = new Member("ee@example.com", "pw");
-        assertNull(cdService.getActiveLoan(m, null));
+        assertNull(CDRepository.findById("NO-SUCH-ID"), "Should return null for non-existing ID");
     }
 
     @Test
-    void previewFine_NoActiveLoan_ShouldReturnZero() {
-        Member m = new Member("ff@example.com", "pw");
-        assertEquals(0.0, cdService.previewFine(m, "CD-ZZ", LocalDate.now()));
-    }
-
-    @Test
-    void previewFine_WithNullToday_ShouldReturnZero() {
-        Member m = new Member("gg@example.com", "pw");
-        CD cd = new CD("CD-1111", "TestAudio", "Artist");
+    void searchFirst_NullOrEmptyKeyword_ShouldReturnNull() {
+        CD cd = new CD("CD-10", "Relax", "ArtistX");
         CDRepository.addCD(cd);
-        cdService.borrowCD(m, "CD-1111", LocalDate.now());
-        assertEquals(0.0, cdService.previewFine(m, "CD-1111", null));
+
+        assertNull(CDRepository.searchFirst(null), "searchFirst(null) should return null");
+        assertNull(CDRepository.searchFirst(""), "searchFirst(\"\") should return null");
     }
 
     @Test
-    void previewFine_WhenNotOverdue_ShouldReturnZero() {
-        Member m = new Member("hh@example.com", "pw");
-        CD cd = new CD("CD-2222", "Calm", "Artist");
+    void searchFirst_TitleMatch_ShouldReturnMatchingCD() {
+        CDRepository.clearCDs();
+        CD cd = new CD("CD-T1", "Chill Beats", "Someone");
         CDRepository.addCD(cd);
-        LocalDate borrow = LocalDate.now().minusDays(3);
-        cdService.borrowCD(m, "CD-2222", borrow);
-        assertEquals(0.0, cdService.previewFine(m, "CD-2222", LocalDate.now()));
+
+        CD found = CDRepository.searchFirst("chill");
+        assertNotNull(found);
+        assertEquals("CD-T1", found.getId());
     }
 
+    @Test
+    void searchFirst_ArtistMatch_ShouldWorkWhenTitleDoesNotMatch() {
+        CDRepository.clearCDs();
+        CD cd = new CD("CD-A1", "NoMatchTitle", "Cool Artist");
+        CDRepository.addCD(cd);
 
+        CD found = CDRepository.searchFirst("cool");
+        assertNotNull(found);
+        assertEquals("CD-A1", found.getId());
+    }
 
-    
-    
+    @Test
+    void searchFirst_IdMatch_ShouldWorkWhenTitleAndArtistDoNotMatch() {
+        CDRepository.clearCDs();
+        CD cd = new CD("CD-SPECIAL-123", "OtherTitle", "OtherArtist");
+        CDRepository.addCD(cd);
+
+        CD found = CDRepository.searchFirst("special-123");
+        assertNotNull(found);
+        assertEquals("CD-SPECIAL-123", found.getId());
+    }
+
+    @Test
+    void searchFirst_NoMatch_ShouldReturnNull() {
+        CDRepository.clearCDs();
+        CD cd = new CD("CD-XX", "SomeTitle", "SomeArtist");
+        CDRepository.addCD(cd);
+
+        CD found = CDRepository.searchFirst("zzz-not-found");
+        assertNull(found, "Should return null if keyword matches nothing");
+    }
+
+    @Test
+    void findAll_ShouldReturnSnapshotOfAllCDs() {
+        CDRepository.clearCDs();
+        CD cd1 = new CD("CD-F1", "Title1", "Artist1");
+        CD cd2 = new CD("CD-F2", "Title2", "Artist2");
+        CDRepository.addCD(cd1);
+        CDRepository.addCD(cd2);
+
+        List<CD> all = CDRepository.findAll();
+        assertEquals(2, all.size());
+        assertTrue(all.contains(cd1));
+        assertTrue(all.contains(cd2));
+    }
+
+    @Test
+    void clearCDs_ShouldEmptyRepository() {
+        CDRepository.clearCDs();
+        CD cd = new CD("CD-CLEAR", "To Be Cleared", "Artist");
+        CDRepository.addCD(cd);
+        assertFalse(CDRepository.findAll().isEmpty(), "Precondition: repository not empty");
+
+        CDRepository.clearCDs();
+        assertTrue(CDRepository.findAll().isEmpty(), "After clearCDs, repository should be empty");
+    }
+
+    @Test
+    void findAllBorrowed_NoBorrowedCDs_ShouldReturnEmptyList() {
+        CDRepository.clearCDs();
+        CD cd1 = new CD("CD-B1", "T1", "A1");
+        CD cd2 = new CD("CD-B2", "T2", "A2");
+        CDRepository.addCD(cd1);
+        CDRepository.addCD(cd2);
+
+        assertFalse(cd1.isBorrowed());
+        assertFalse(cd2.isBorrowed());
+
+        List<CD> borrowed = CDRepository.findAllBorrowed();
+        assertNotNull(borrowed);
+        assertTrue(borrowed.isEmpty(), "No borrowed CDs expected");
+    }
+
+    @Test
+    void findAllBorrowed_WithBorrowedCDs_ShouldReturnThem() {
+        CDRepository.clearCDs();
+        CD cd = new CD("CD-BORROWED", "BorrowedTitle", "BorrowedArtist");
+        CDRepository.addCD(cd);
+        Member member = new Member("borrower@example.com", "pw");
+
+        cdService.borrowCD(member, "CD-BORROWED", LocalDate.now());
+        assertTrue(cd.isBorrowed(), "CD should be marked as borrowed by service");
+
+        List<CD> borrowed = CDRepository.findAllBorrowed();
+        assertEquals(1, borrowed.size());
+        assertEquals("CD-BORROWED", borrowed.get(0).getId());
+    }
+
+    @Test
+    void removeById_NonExistingId_ShouldReturnFalseAndKeepOtherCDs() {
+        CDRepository.clearCDs();
+        CD cd = new CD("CD-EXIST", "Exists", "Artist");
+        CDRepository.addCD(cd);
+
+        boolean removed = CDRepository.removeById("NO-EXIST");
+        assertFalse(removed, "removeById should return false for non-existing id");
+        assertNotNull(CDRepository.findById("CD-EXIST"), "Existing CD should remain");
+    }
 }

@@ -1,6 +1,12 @@
 package domaintest;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.any;
+
+import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.List;
 
 import java.time.LocalDate;
 import java.util.Arrays;
@@ -11,6 +17,7 @@ import org.junit.jupiter.api.Test;
 
 import domain.Loan;
 import domain.Member;
+import domain.Loan;
 
 class MemberTest {
 
@@ -119,61 +126,69 @@ class MemberTest {
         assertTrue(str.contains("Member"));
     }
 
-    // ================================
-    // calculateTotalFines()
-    // ================================
+    // ===================== calculateTotalFines Tests =====================
+
     @Test
-    void testCalculateTotalFines_NullLoans_ReturnsZero() {
-        double result = member.calculateTotalFines(null, LocalDate.now());
-        assertEquals(0.0, result);
+    void testCalculateTotalFinesWithNullLoans() {
+        double total = member.calculateTotalFines(null, LocalDate.now());
+        assertEquals(0.0, total, 1e-9);
     }
 
     @Test
-    void testCalculateTotalFines_IgnoresNullLoanEntries() {
-        Iterable<Loan> loans = Arrays.asList(null, null);
-        double result = member.calculateTotalFines(loans, LocalDate.now());
-        assertEquals(0.0, result);
-    }
+    void testCalculateTotalFinesNoLoanMatches() {
+        member.setId("M001"); 
 
-    @Test
-    void testCalculateTotalFines_IgnoresReturnedLoans() {
-        Loan l = new Loan("ISBN", "ID001", LocalDate.now().minusDays(10), LocalDate.now().minusDays(5));
-        l.setReturned(true);
-        Iterable<Loan> loans = Collections.singletonList(l);
-        double result = member.calculateTotalFines(loans, LocalDate.now());
-        assertEquals(0.0, result);
-    }
+        Loan nullLoan = null; 
 
-    @Test
-    void testCalculateTotalFines_IgnoresLoansOfOtherMembers() {
-        Loan l = new Loan("ISBN", "OTHER_ID", LocalDate.now().minusDays(10), LocalDate.now().minusDays(5));
-        Iterable<Loan> loans = Collections.singletonList(l);
-        double result = member.calculateTotalFines(loans, LocalDate.now());
-        assertEquals(0.0, result);
-    }
+        Loan returnedLoan = mock(Loan.class);
+        when(returnedLoan.isReturned()).thenReturn(true); 
+        when(returnedLoan.getMemberId()).thenReturn("M001");
 
-    @Test
-    void testCalculateTotalFines_IdNull_SkipAllLoans() {
-        Member m = new Member("user", "pass");
-        m.setId(null);
-
-        Loan l = new Loan("ISBN", "ID001", LocalDate.now().minusDays(10), LocalDate.now().minusDays(5));
-        Iterable<Loan> loans = Collections.singletonList(l);
-
-        double result = m.calculateTotalFines(loans, LocalDate.now());
-        assertEquals(0.0, result);
-    }
-
-    @Test
-    void testCalculateTotalFines_AccumulatesCorrectly() {
-        Loan l1 = new Loan("ISBN1", "ID001", LocalDate.now().minusDays(10), LocalDate.now().minusDays(5));
-        Loan l2 = new Loan("ISBN2", "ID001", LocalDate.now().minusDays(7), LocalDate.now().minusDays(3));
-
-        Iterable<Loan> loans = Arrays.asList(l1, l2);
+        Loan otherMemberLoan = mock(Loan.class);
+        when(otherMemberLoan.isReturned()).thenReturn(false); 
+        when(otherMemberLoan.getMemberId()).thenReturn("OTHER"); 
+        List<Loan> loans = Arrays.asList(nullLoan, returnedLoan, otherMemberLoan);
 
         double total = member.calculateTotalFines(loans, LocalDate.now());
-        double expected = l1.getFineAmount() + l2.getFineAmount();
+        assertEquals(0.0, total, 1e-9);
+    }
 
-        assertEquals(expected, total);
+    @Test
+    void testCalculateTotalFinesWithMatchingLoans() {
+        member.setId("M001"); 
+
+        Loan loan1 = mock(Loan.class);
+        when(loan1.isReturned()).thenReturn(false);
+        when(loan1.getMemberId()).thenReturn("M001");
+        when(loan1.getFineAmount()).thenReturn(10.0);
+
+        Loan loan2 = mock(Loan.class);
+        when(loan2.isReturned()).thenReturn(false);
+        when(loan2.getMemberId()).thenReturn("M001");
+        when(loan2.getFineAmount()).thenReturn(5.0);
+
+        List<Loan> loans = Arrays.asList(loan1, loan2);
+
+        LocalDate today = LocalDate.now();
+        double total = member.calculateTotalFines(loans, today);
+
+        assertEquals(15.0, total, 1e-9);
+
+        verify(loan1).calculateFine(today);
+        verify(loan2).calculateFine(today);
+    }
+
+    @Test
+    void testCalculateTotalFinesWithNullMemberId() {
+        Loan activeLoan = mock(Loan.class);
+        when(activeLoan.isReturned()).thenReturn(false);
+        when(activeLoan.getMemberId()).thenReturn("M001");
+
+        List<Loan> loans = Arrays.asList(activeLoan);
+
+        double total = member.calculateTotalFines(loans, LocalDate.now());
+        assertEquals(0.0, total, 1e-9);
+
+        verify(activeLoan, never()).calculateFine(any(LocalDate.class));
     }
 }

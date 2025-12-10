@@ -1,6 +1,7 @@
 package application;
 
 import domain.Admin;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -35,37 +36,36 @@ public class AdminFileLoader implements AdminSourceLoader {
 		return new BufferedReader(new InputStreamReader(inputStream));
 	}
 
-	/**
-	 * Reads the file and creates Admin objects with username and password.
-	 *
-	 * @return a list of Admin objects loaded from the file
-	 * @throws Exception if reading the resource fails
-	 */
-	@Override
-	public List<Admin> loadAdmins() throws Exception {
-	    final List<Admin> admins = new ArrayList<>();
+    /**
+     * Reads the file and creates Admin objects with username and password.
+     *
+     * @return a list of Admin objects loaded from the file
+     * @throws Exception if reading the resource fails
+     */
+    @Override
+    public List<Admin> loadAdmins() throws Exception {
+        final List<Admin> admins = new ArrayList<>();
+        final InputStream inputStream = getClass().getClassLoader().getResourceAsStream(fileName);
 
-	    final InputStream inputStream = getClass().getClassLoader().getResourceAsStream(fileName);
-	    if (inputStream == null) {
-	        throw new IOException("Error reading file: " + fileName);
-	    }
+        if (inputStream == null) {
+            throw new IOException("Error reading file: " + fileName);
+        }
 
-	    try (BufferedReader buffer = createBufferedReader(inputStream)) {
-	        String line;
-	        while ((line = buffer.readLine()) != null) {
-	            String[] parts = line.split(",");
+        try (BufferedReader buffer = new BufferedReader(new InputStreamReader(inputStream))) {
+            String line;
+            while ((line = buffer.readLine()) != null) {
+                String[] parts = line.split(",");
+                if (parts.length >= 2) {
+                    String username = parts[0].trim();
+                    String password = parts[1].trim();
+                    admins.add(new Admin(username, password));
+                }
+            }
+            LOGGER.info("Admins loaded successfully from " + fileName);
+        } catch (IOException e) {
+            throw new IOException("Error reading file: " + fileName, e);
+        }
 
-	            if (parts.length >= 2) {
-	                String username = parts[0].trim();
-	                String password = parts[1].trim();
-	                admins.add(new Admin(username, password));
-	            }
-	        }
-	        LOGGER.info("Admins loaded successfully from " + fileName);
-	    } catch (IOException e) {
-	        throw new IOException("Error reading file: " + fileName, e);
-	    }
-
-	    return admins;
-	}
+        return admins;
+    }
 }

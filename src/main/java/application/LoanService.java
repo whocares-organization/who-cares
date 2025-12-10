@@ -42,7 +42,7 @@ public class LoanService extends Observable {
         this.borrowingRules = new BorrowingRules();
         this.loanRepository = new LoanRepository();
     }
-    
+
     /**
      * Creates a service with a provided repository and default rules.
      *
@@ -68,7 +68,7 @@ public class LoanService extends Observable {
      * Borrows a book identified by its ISBN for the given user.
      * Applies rules and saves the loan with a standard due date.
      *
-     * @param isbn book identifier
+     * @param isbn     book identifier
      * @param userName member email/username
      * @return created loan
      */
@@ -77,14 +77,16 @@ public class LoanService extends Observable {
         borrowingRules.ensureCanBorrow(member, loanRepository);
         Book book = getExistingBook(isbn);
         ensureBookNotAlreadyBorrowed(isbn);
+
         LocalDate today = LocalDate.now();
         Loan loan = new Loan(isbn, userName, today, today.plusDays(STANDARD_LOAN_DAYS));
         LoanRepository.save(loan);
         book.setBorrowed(true);
+
         LOGGER.info("Book borrowed successfully! Due date: " + loan.getDueDate());
         return loan;
     }
-    
+
     /**
      * Saves a loan in the repository.
      *
@@ -100,7 +102,7 @@ public class LoanService extends Observable {
     /**
      * Returns a borrowed book, marks it as returned, and applies fines if overdue.
      *
-     * @param isbn book identifier
+     * @param isbn     book identifier
      * @param memberId member email/username
      */
     public void returnBook(String isbn, String memberId) {
@@ -109,9 +111,11 @@ public class LoanService extends Observable {
             LOGGER.info("No active loan found for this book/member.");
             return;
         }
+
         LoanRepository.markReturned(loan);
         Book book = BookRepository.findBookByIsbn(isbn);
         if (book != null) book.setBorrowed(false);
+
         LocalDate today = LocalDate.now();
         if (loan.isOverdue(today)) {
             loan.calculateFine(today);
@@ -121,6 +125,7 @@ public class LoanService extends Observable {
                 LOGGER.info("Book was overdue. Fine added: " + loan.getFineAmount());
             }
         }
+
         LOGGER.info("Book returned successfully!");
     }
 
@@ -132,6 +137,7 @@ public class LoanService extends Observable {
      */
     public List<Loan> findOverdues(LocalDate today) {
         List<Loan> overdueLoans = LoanRepository.findAllActiveOverdue(today);
+
         overdueLoans.forEach(loan -> {
             loan.calculateFine(today);
             Member member = MemberRepository.findById(loan.getMemberId());
@@ -142,9 +148,11 @@ public class LoanService extends Observable {
                         + " for book ISBN " + loan.getIsbn());
             }
         });
+
         if (overdueLoans.isEmpty()) {
             LOGGER.info("No overdue books found.");
         }
+
         return overdueLoans;
     }
 
@@ -174,6 +182,7 @@ public class LoanService extends Observable {
             LOGGER.info("No active loans currently.");
             return;
         }
+
         LOGGER.info("=== Active Loans ===");
         LocalDate today = LocalDate.now();
         loans.forEach(l -> LOGGER.info(
@@ -183,12 +192,12 @@ public class LoanService extends Observable {
                         + (l.isOverdue(today) ? " | OVERDUE" : "")
         ));
     }
-    
+
     /**
      * Returns overdue loans for a specific member as of a date.
      *
      * @param memberId member email/username
-     * @param date current date
+     * @param date     current date
      * @return list of overdue loans
      */
     public List<Loan> getOverdueLoansForMember(String memberId, LocalDate date) {
@@ -217,7 +226,7 @@ public class LoanService extends Observable {
             throw new IllegalStateException("Book is already borrowed");
         }
     }
-    
+
     /**
      * Counts active loans in the repository.
      *
@@ -235,8 +244,8 @@ public class LoanService extends Observable {
      */
     public int countReturnedOn(LocalDate date) {
         return (int) loanRepository.findAll().stream()
-            .filter(l -> l.isReturned() && l.getDueDate().equals(date))
-            .count();
+                .filter(l -> l.isReturned() && l.getDueDate().equals(date))
+                .count();
     }
 
     /**
@@ -247,9 +256,9 @@ public class LoanService extends Observable {
      */
     public List<Loan> findLatestLoans(int limit) {
         return loanRepository.findAll().stream()
-            .sorted((a,b)-> b.getBorrowDate().compareTo(a.getBorrowDate()))
-            .limit(limit)
-            .toList();
+                .sorted((a, b) -> b.getBorrowDate().compareTo(a.getBorrowDate()))
+                .limit(limit)
+                .toList();
     }
 
     /**
@@ -270,7 +279,7 @@ public class LoanService extends Observable {
     public List<Loan> findOverdueLoans(LocalDate date) {
         return loanRepository.findAllActiveOverdue(date);
     }
-    
+
     /**
      * Indicates whether a member has active loans.
      *
@@ -289,8 +298,8 @@ public class LoanService extends Observable {
     /**
      * Borrows generic media for a member using default media rules.
      *
-     * @param member member entity
-     * @param media media entity
+     * @param member     member entity
+     * @param media      media entity
      * @param borrowDate borrow date
      * @return created loan
      */
@@ -298,13 +307,16 @@ public class LoanService extends Observable {
         if (member == null || media == null) {
             throw new IllegalArgumentException("Member and media must be provided.");
         }
+
         borrowingRules.ensureCanBorrow(member, loanRepository);
         if (media.isBorrowed()) {
             throw new IllegalStateException("Media already borrowed.");
         }
+
         Loan loan = new Loan(media, member.getUserName(), borrowDate);
         loanRepository.save(loan);
         media.setBorrowed(true);
+
         LOGGER.info("Media borrowed: " + media.getId() + " by member " + member.getUserName());
         return loan;
     }
@@ -313,8 +325,8 @@ public class LoanService extends Observable {
      * Borrows generic media with a custom number of days.
      * If days is null or non-positive, defaults to media borrow period.
      *
-     * @param member member entity
-     * @param media media entity
+     * @param member     member entity
+     * @param media      media entity
      * @param borrowDate borrow date
      * @param customDays optional custom days (>0)
      * @return created loan
@@ -323,10 +335,12 @@ public class LoanService extends Observable {
         if (member == null || media == null) {
             throw new IllegalArgumentException("Member and media must be provided.");
         }
+
         borrowingRules.ensureCanBorrow(member, loanRepository);
         if (media.isBorrowed()) {
             throw new IllegalStateException("Media already borrowed.");
         }
+
         Loan loan;
         if (customDays == null || customDays <= 0) {
             loan = new Loan(media, member.getUserName(), borrowDate);
@@ -336,10 +350,17 @@ public class LoanService extends Observable {
             loan.setMedia(media);
             media.borrowAt(borrowDate);
         }
+
         loanRepository.save(loan);
         media.setBorrowed(true);
-        LOGGER.info("Media borrowed: " + media.getId() + " by member " + member.getUserName() +
-                " | days=" + (customDays == null || customDays <= 0 ? media.getBorrowPeriod() : customDays));
+
+        LOGGER.info(
+                "Media borrowed: " + media.getId()
+                        + " by member " + member.getUserName()
+                        + " | days=" + (customDays == null || customDays <= 0
+                        ? media.getBorrowPeriod()
+                        : customDays)
+        );
         return loan;
     }
 
@@ -350,22 +371,25 @@ public class LoanService extends Observable {
     /**
      * Returns media associated with the loan and marks it returned.
      *
-     * @param loan loan to return
+     * @param loan       loan to return
      * @param returnDate date of return (currently informational)
      */
     public void returnMedia(Loan loan, LocalDate returnDate) {
         if (loan == null) {
             throw new IllegalArgumentException("Loan must be provided.");
         }
+
         if (loan.isReturned()) {
             LOGGER.info("Loan already returned.");
             return;
         }
+
         loan.setReturned(true);
         Media media = loan.getMedia();
         if (media != null) {
             media.markReturned();
         }
+
         LOGGER.info("Media returned: " + loan.getIsbn());
     }
 
@@ -377,15 +401,15 @@ public class LoanService extends Observable {
      * Calculates the total fines for all loans belonging to a member.
      *
      * @param member member entity
-     * @param today current date
+     * @param today  current date
      * @return total fines
      */
     public double calculateTotalFinesForMember(Member member, LocalDate today) {
         if (member == null) return 0.0;
+
         double total = 0.0;
         for (Loan loan : loanRepository.findAll()) {
-            if (loan.getMemberId() != null &&
-                loan.getMemberId().equals(member.getUserName())) {
+            if (loan.getMemberId() != null && loan.getMemberId().equals(member.getUserName())) {
                 loan.calculateFine(today);
                 total += loan.getFineAmount();
             }
@@ -397,59 +421,72 @@ public class LoanService extends Observable {
      * Testing-only borrow with custom days/hours/minutes/seconds.
      * Creates and tracks a testing-mode loan with a wall-clock expiration.
      *
-     * @param member member entity
-     * @param media media entity
+     * @param member     member entity
+     * @param media      media entity
      * @param borrowDate borrow date
-     * @param days testing days (>=0)
-     * @param hours testing hours (>=0)
-     * @param minutes testing minutes (>=0)
-     * @param seconds testing seconds (>=0)
+     * @param days       testing days (>=0)
+     * @param hours      testing hours (>=0)
+     * @param minutes    testing minutes (>=0)
+     * @param seconds    testing seconds (>=0)
      * @return created loan (tracked in testing-mode list)
      */
-    public Loan borrowMediaTestDuration(Member member,
-                                        Media media,
-                                        LocalDate borrowDate,
-                                        int days,
-                                        int hours,
-                                        int minutes,
-                                        int seconds) {
+    public Loan borrowMediaTestDuration(
+            Member member,
+            Media media,
+            LocalDate borrowDate,
+            int days,
+            int hours,
+            int minutes,
+            int seconds
+    ) {
         if (member == null || media == null) {
             throw new IllegalArgumentException("Member and media must be provided.");
         }
+
         if (days < 0 || hours < 0 || minutes < 0 || seconds < 0) {
             throw new IllegalArgumentException("Duration components cannot be negative.");
         }
+
         boolean allZero = days == 0 && hours == 0 && minutes == 0 && seconds == 0;
         if (allZero) {
             throw new IllegalArgumentException("Testing duration must be greater than zero.");
         }
+
         borrowingRules.ensureCanBorrow(member, loanRepository);
         if (media.isBorrowed()) {
             throw new IllegalStateException("Media already borrowed.");
         }
+
         long totalSeconds =
-                (long) days * 24 * 60 * 60 +
-                (long) hours * 60 * 60 +
-                (long) minutes * 60 +
-                (long) seconds;
+                (long) days * 24 * 60 * 60
+                        + (long) hours * 60 * 60
+                        + (long) minutes * 60
+                        + (long) seconds;
+
         long daysPortion = totalSeconds / (24 * 60 * 60);
         long leftover = totalSeconds % (24 * 60 * 60);
+
         LocalDate dueDate = borrowDate.plusDays(daysPortion + (leftover > 0 ? 1 : 0));
+
         Loan loan = new Loan(media.getId(), member.getUserName(), borrowDate, dueDate);
         loan.setMedia(media);
         media.borrowAt(borrowDate);
         loanRepository.save(loan);
         media.setBorrowed(true);
+
         synchronized (testingModeLoans) {
-            int secondsForWatcher = totalSeconds > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) totalSeconds;
+            int secondsForWatcher =
+                    totalSeconds > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) totalSeconds;
             loan.setTestingDurationSeconds(secondsForWatcher);
             loan.setTestingDueDate(Instant.now().plusSeconds(totalSeconds));
             testingModeLoans.add(loan);
         }
-        LOGGER.info("[TESTING MODE] Media borrowed: " + media.getId() +
-                " by member " + member.getUserName() +
-                " | custom testing duration seconds=" + totalSeconds +
-                " | testing due at=" + loan.getTestingDueDate());
+
+        LOGGER.info("[TESTING MODE] Media borrowed: " + media.getId()
+                + " by member " + member.getUserName()
+                + " | custom testing duration seconds=" + totalSeconds
+                + " | testing due at=" + loan.getTestingDueDate());
+
         return loan;
     }
 
@@ -457,8 +494,8 @@ public class LoanService extends Observable {
      * Testing-only borrow with a duration expressed in seconds.
      * Creates and tracks a testing-mode loan with a wall-clock expiration.
      *
-     * @param member member entity
-     * @param media media entity
+     * @param member  member entity
+     * @param media   media entity
      * @param seconds testing duration in seconds (>0)
      * @return created loan (tracked in testing-mode list)
      */
@@ -466,26 +503,32 @@ public class LoanService extends Observable {
         if (member == null || media == null) {
             throw new IllegalArgumentException("Member and media must be provided.");
         }
+
         if (seconds <= 0) {
             throw new IllegalArgumentException("Testing duration seconds must be > 0");
         }
+
         borrowingRules.ensureCanBorrow(member, loanRepository);
         if (media.isBorrowed()) {
             throw new IllegalStateException("Media already borrowed.");
         }
+
         LocalDate borrowDate = LocalDate.now();
         Loan loan = new Loan(media, member.getUserName(), borrowDate);
         loan.setTestingDurationSeconds(seconds);
         loan.setTestingDueDate(Instant.now().plusSeconds(seconds));
         loanRepository.save(loan);
         media.setBorrowed(true);
+
         synchronized (testingModeLoans) {
             testingModeLoans.add(loan);
         }
-        LOGGER.info("[TESTING MODE] Media borrowed: " + media.getId() +
-                " by member " + member.getUserName() +
-                " | testing seconds=" + seconds +
-                " | testing due at=" + loan.getTestingDueDate());
+
+        LOGGER.info("[TESTING MODE] Media borrowed: " + media.getId()
+                + " by member " + member.getUserName()
+                + " | testing seconds=" + seconds
+                + " | testing due at=" + loan.getTestingDueDate());
+
         return loan;
     }
 

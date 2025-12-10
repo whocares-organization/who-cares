@@ -21,6 +21,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.anyString;
 
 class AdminActionsTest {
 
@@ -58,6 +60,18 @@ class AdminActionsTest {
         boolean result = adminActions.isAdmin(notInRepo);
         assertFalse(result, "Non-existing admin should not be recognized as admin");
     }
+
+    @Test
+    void isAdmin_ShouldReturnFalse_WhenAdminIsNull() {
+        assertFalse(adminActions.isAdmin(null), "Null admin should not be recognized as admin");
+    }
+
+    @Test
+    void isAdmin_ShouldReturnFalse_WhenUserNameIsNull() {
+        Admin a = new Admin();
+        a.setUserName(null);
+        assertFalse(adminActions.isAdmin(a), "Admin with null username should not be recognized as admin");
+    }
     // ==================================================
 
     // ================= Register Member Tests =================
@@ -76,6 +90,18 @@ class AdminActionsTest {
                 () -> adminActions.registerMember(notAdmin, member));
         assertEquals("Admin must be logged in to register members.", ex.getMessage());
         assertNull(MemberRepository.findMemberByEmail("user2@example.com"), "Member should not be registered");
+    }
+
+    @Test
+    void registerMember_ShouldThrow_WhenMemberServiceFails() {
+        Member bad = new Member("", ""); 
+
+        IllegalStateException ex = assertThrows(
+                IllegalStateException.class,
+                () -> adminActions.registerMember(existingAdmin, bad)
+        );
+
+        assertEquals("Failed to register member (maybe already exists or invalid).", ex.getMessage());
     }
     // ==========================================================
 
@@ -104,6 +130,11 @@ class AdminActionsTest {
         boolean result = adminActions.canBeUnregistered(member);
         assertFalse(result, "Member with unpaid fines should not be unregisterable");
     }
+
+    @Test
+    void canBeUnregistered_WithNullMember_ShouldReturnFalse() {
+        assertFalse(adminActions.canBeUnregistered(null), "Null member cannot be unregistered");
+    }
     // ===========================================================
 
     // ================= unregisterMember Tests =================
@@ -125,9 +156,37 @@ class AdminActionsTest {
         assertEquals("Admin must be logged in to unregister members.", ex.getMessage());
         assertNotNull(MemberRepository.findById(member.getId()), "Member should remain in repository");
     }
+
+    @Test
+    void unregisterMember_ShouldThrow_WhenMemberNotFound() {
+        String fakeId = "NO_SUCH_ID";
+
+        IllegalArgumentException ex = assertThrows(
+                IllegalArgumentException.class,
+                () -> adminActions.unregisterMember(existingAdmin, fakeId)
+        );
+
+        assertEquals("Member not found.", ex.getMessage());
+    }
+
+    @Test
+    void unregisterMember_ShouldThrow_WhenMemberHasActiveLoansOrFines() {
+        Member member = new Member("M-X", "x@example.com", "pw");
+        MemberRepository.addMember(member);
+
+        LoanRepository.save(new Loan("ISBN-X", member.getUserName(),
+                LocalDate.now(), LocalDate.now().plusDays(7)));
+
+        IllegalStateException ex = assertThrows(
+                IllegalStateException.class,
+                () -> adminActions.unregisterMember(existingAdmin, member.getId())
+        );
+
+        assertEquals("Cannot unregister member with active loans or unpaid fines.", ex.getMessage());
+    }
     // ===========================================================
-    
- // ================= borrowMedia Tests =================
+
+    // ================= borrowMedia Tests =================
     @Test
     void borrowMediaWithValidAdmin_ShouldCreateLoan() {
         Member member = new Member("user100@example.com", "pw");
@@ -157,6 +216,20 @@ class AdminActionsTest {
         assertEquals("Admin must be logged in to borrow media.", ex.getMessage());
         assertFalse(book.isBorrowed(), "Book should not be marked borrowed");
     }
+
+    @Test
+    void borrowMedia_WithNullMember_ShouldThrow() {
+        domain.Book book = new domain.Book("ISBN-NULL-M", "T", "A");
+        persistence.BookRepository.addBook(book);
+
+        IllegalArgumentException ex = assertThrows(
+                IllegalArgumentException.class,
+                () -> adminActions.borrowMedia(existingAdmin, null, book, LocalDate.now())
+        );
+
+        assertEquals("Member and media must be provided.", ex.getMessage());
+    }
+    // =====================================================
 
     // ================= returnMedia Tests =================
     @Test
@@ -192,6 +265,17 @@ class AdminActionsTest {
         assertEquals("Admin must be logged in to return media.", ex.getMessage());
         assertFalse(loan.isReturned(), "Loan should remain active");
     }
+
+    @Test
+    void returnMedia_WithNullLoan_ShouldThrow() {
+        IllegalArgumentException ex = assertThrows(
+                IllegalArgumentException.class,
+                () -> adminActions.returnMedia(existingAdmin, null, LocalDate.now())
+        );
+
+        assertEquals("Loan must be provided.", ex.getMessage());
+    }
+    // ====================================================
 
     // ================= calculateMemberFineSummary Tests =================
     @Test
@@ -229,49 +313,15 @@ class AdminActionsTest {
 
         assertEquals("Admin must be logged in to view fine summaries.", ex.getMessage());
     }
-    
+
     @Test
-    void registerMember_ShouldThrow_WhenMemberServiceFails() {
-       
-        Member bad = new Member("", ""); 
-
-        IllegalStateException ex = assertThrows(
-                IllegalStateException.class,
-                () -> adminActions.registerMember(existingAdmin, bad)
-        );
-
-        assertEquals("Failed to register member (maybe already exists or invalid).", ex.getMessage());
+    void calculateMemberFineSummary_WithNullMember_ShouldReturnZero() {
+        double total = adminActions.calculateMemberFineSummary(existingAdmin, null, LocalDate.now());
+        assertEquals(0.0, total, 0.0001, "Null member should return zero fine summary");
     }
-    
-    @Test
-    void unregisterMember_ShouldThrow_WhenMemberNotFound() {
-        String fakeId = "NO_SUCH_ID";
+    // =====================================================
 
-        IllegalArgumentException ex = assertThrows(
-                IllegalArgumentException.class,
-                () -> adminActions.unregisterMember(existingAdmin, fakeId)
-        );
-
-        assertEquals("Member not found.", ex.getMessage());
-    }
-    
-    @Test
-    void unregisterMember_ShouldThrow_WhenMemberHasActiveLoansOrFines() {
-        Member member = new Member("M-X", "x@example.com", "pw");
-        MemberRepository.addMember(member);
-
-      
-        LoanRepository.save(new Loan("ISBN-X", member.getUserName(),
-                LocalDate.now(), LocalDate.now().plusDays(7)));
-
-        IllegalStateException ex = assertThrows(
-                IllegalStateException.class,
-                () -> adminActions.unregisterMember(existingAdmin, member.getId())
-        );
-
-        assertEquals("Cannot unregister member with active loans or unpaid fines.", ex.getMessage());
-    }
-    
+    // ================= searchMemberById Tests =================
     @Test
     void searchMemberById_WithValidAdminAndExistingMember_ShouldReturnNullButCallService() {
         Member m = new Member("M-500", "user500@example.com", "pw");
@@ -292,6 +342,24 @@ class AdminActionsTest {
         assertNull(adminActions.searchMemberById(existingAdmin, null));
     }
 
+    @Test
+    void searchMemberById_WhenMemberServiceThrowsNPE_ShouldCatchAndReturnNull() {
+        MemberService faulty = mock(MemberService.class);
+        LoanService dummyLoanService = mock(LoanService.class);
+
+        when(faulty.findMemberById(anyString()))
+                .thenThrow(new NullPointerException("boom"));
+
+        AdminActions actions = new AdminActions(faulty, dummyLoanService);
+
+        assertDoesNotThrow(() -> {
+            Object result = actions.searchMemberById(existingAdmin, "ID-1");
+            assertNull(result);
+        });
+    }
+    // ==========================================================
+
+    // ================= borrowMediaTestDuration Tests =================
     @Test
     void borrowMediaTestDuration_WithValidAdmin_ShouldCreateLoan() {
         Member member = new Member("user700@example.com", "pw");
@@ -352,7 +420,9 @@ class AdminActionsTest {
                 )
         );
     }
+    // ===============================================================
 
+    // ================= sendEmailToMember / sendRealEmail Tests =================
     @Test
     void sendEmailToMember_WithValidAdmin_ShouldSend() {
         EmailService email = mock(EmailService.class);
@@ -409,5 +479,57 @@ class AdminActionsTest {
         assertEquals("Valid member is required.", ex.getMessage());
     }
 
+    @Test
+    void sendEmailToMember_ShouldThrow_WhenAdminNotLoggedIn() {
+        EmailService email = mock(EmailService.class);
 
+        AdminActions actions = new AdminActions(
+                new MemberService(new MemberRepository()),
+                new LoanService(new BorrowingRules(), new LoanRepository()),
+                email
+        );
+
+        existingAdmin.setStatus(UserStatus.OFFLINE);
+        Member m = new Member("user603@example.com", "pw");
+
+        IllegalStateException ex = assertThrows(
+                IllegalStateException.class,
+                () -> actions.sendEmailToMember(existingAdmin, m, "S", "B")
+        );
+
+        assertEquals("Admin must be logged in to send emails.", ex.getMessage());
+    }
+
+    @Test
+    void sendRealEmailToMember_ShouldDelegateToEmailService() {
+        EmailService email = mock(EmailService.class);
+
+        AdminActions actions = new AdminActions(
+                new MemberService(new MemberRepository()),
+                new LoanService(new BorrowingRules(), new LoanRepository()),
+                email
+        );
+
+        Member m = new Member("user602@example.com", "pw");
+
+        actions.sendRealEmailToMember(existingAdmin, m, "Hello", "Real body");
+
+        verify(email, times(1))
+                .sendEmail("user602@example.com", "Hello", "Real body");
+    }
+    // ======================================================================
+
+    // ================= Private helper coverage =================
+    @Test
+    void resolveMemberIdentifier_ShouldReturnUserName() throws Exception {
+        Member m = new Member("user800@example.com", "pw");
+
+        java.lang.reflect.Method method =
+                AdminActions.class.getDeclaredMethod("resolveMemberIdentifier", Member.class);
+        method.setAccessible(true);
+        String result = (String) method.invoke(adminActions, m);
+
+        assertEquals("user800@example.com", result);
+    }
+    // ===========================================================
 }

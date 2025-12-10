@@ -220,15 +220,21 @@ public class AdminActions {
      * @return the person or {@code null} if not found or not authorized
      */
     public Person searchMemberById(Admin p, String memberIdToSearch) {
-        if (!hasActiveSession(p)) {
+      
+        if (!hasActiveSession(p) || memberIdToSearch == null) {
             return null;
         }
-        if (memberIdToSearch == null) {
-            return null;
+
+        
+        try {
+            memberService.findMemberById(memberIdToSearch);
+        } catch (NullPointerException ex) {
+            LOGGER.warning("Member lookup threw NullPointerException: " + ex.getMessage());
         }
-        memberService.findMemberById(memberIdToSearch);
+
         return null;
     }
+
 
     /**
      * Sends an email to a member using the configured email service.
