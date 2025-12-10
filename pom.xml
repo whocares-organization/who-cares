@@ -1,247 +1,258 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" 
-xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>library.najah.edu</groupId>
-  <artifactId>library-management-system</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+    <modelVersion>4.0.0</modelVersion>
 
-  <!-- ======================== -->
-  <!--        PROPERTIES        -->
-  <!-- ======================== -->
-  <properties>
-    <maven.compiler.source>17</maven.compiler.source>
-    <maven.compiler.target>17</maven.compiler.target>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <javafx.version>21.0.4</javafx.version>
-  </properties>
+    <groupId>library.najah.edu</groupId>
+    <artifactId>library-management-system</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
 
-  <!-- ======================== -->
-  <!--   JUNIT VERSION CONTROL  -->
-  <!-- ======================== -->
-  <dependencyManagement>
-    <dependencies>
-      <dependency>
-        <groupId>org.junit</groupId>
-        <artifactId>junit-bom</artifactId>
-        <version>5.10.2</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
+    <!-- ====================== -->
+    <!--       PROPERTIES        -->
+    <!-- ====================== -->
+    <properties>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <javafx.version>21.0.4</javafx.version>
+    </properties>
 
-  <!-- ======================== -->
-  <!--         BUILD            -->
-  <!-- ======================== -->
-  <build>
-    <plugins>
+    <!-- ====================== -->
+    <!--  JUNIT VERSION CONTROL -->
+    <!-- ====================== -->
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.junit</groupId>
+                <artifactId>junit-bom</artifactId>
+                <version>5.10.2</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
-      <!-- Java Compiler -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.11.0</version>
-        <configuration>
-          <source>${maven.compiler.source}</source>
-          <target>${maven.compiler.target}</target>
-        </configuration>
-      </plugin>
+    <!-- ====================== -->
+    <!--         BUILD          -->
+    <!-- ====================== -->
+    <build>
+        <plugins>
 
-      <!-- Checkstyle -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-checkstyle-plugin</artifactId>
-        <version>3.6.0</version>
-        <executions>
-          <execution>
-            <id>generate-checkstyle-report</id>
-            <phase>verify</phase>
+            <!-- Java Compiler -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.11.0</version>
+                <configuration>
+                    <source>${maven.compiler.source}</source>
+                    <target>${maven.compiler.target}</target>
+                </configuration>
+            </plugin>
+
+            <!-- Checkstyle -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <version>3.6.0</version>
+                <executions>
+                    <execution>
+                        <id>generate-checkstyle-report</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>checkstyle</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <configLocation>google_checks.xml</configLocation>
+                    <outputFile>${project.build.directory}/checkstyle-result.xml</outputFile>
+                    <outputFileFormat>xml</outputFileFormat>
+                </configuration>
+            </plugin>
+
+            <!-- PMD -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-pmd-plugin</artifactId>
+                <version>3.27.0</version>
+                <executions>
+                    <execution>
+                        <id>generate-pmd-report</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>pmd</goal>
+                            <goal>cpd-check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <format>xml</format>
+                    <targetDirectory>${project.build.directory}</targetDirectory>
+                    <rulesets>
+                        <ruleset>category/java/bestpractices.xml</ruleset>
+                        <ruleset>category/java/codestyle.xml</ruleset>
+                        <ruleset>category/java/design.xml</ruleset>
+                        <ruleset>category/java/documentation.xml</ruleset>
+                        <ruleset>category/java/errorprone.xml</ruleset>
+                        <ruleset>category/java/multithreading.xml</ruleset>
+                        <ruleset>category/java/performance.xml</ruleset>
+                        <ruleset>category/java/security.xml</ruleset>
+                    </rulesets>
+                    <failOnViolation>false</failOnViolation>
+                    <includeTests>true</includeTests>
+                </configuration>
+            </plugin>
+
+            <!-- Violations Plugin -->
+            <plugin>
+                <groupId>se.bjurr.violations</groupId>
+                <artifactId>violations-maven-plugin</artifactId>
+                <version>3.1.1</version>
+                <executions>
+                    <execution>
+                        <id>violations-report</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>violations</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <checkstyleEnabled>true</checkstyleEnabled>
+                    <pmdEnabled>true</pmdEnabled>
+                </configuration>
+            </plugin>
+
+            <!-- Surefire Test Runner -->
+<plugin>
+    <groupId>org.apache.maven.plugins</groupId>
+    <artifactId>maven-surefire-plugin</artifactId>
+    <version>3.1.2</version>
+    <configuration>
+        <useModulePath>false</useModulePath>
+
+        <!-- FIX: preserve jacoco agent -->
+        <argLine>${argLine} --add-opens java.base/java.lang=ALL-UNNAMED</argLine>
+
+        <!-- make sure all tests run -->
+        <includes>
+            <include>**/*Test.java</include>
+            <include>**/*Tests.java</include>
+        </includes>
+    </configuration>
+</plugin>
+
+
+            <!-- JavaFX -->
+            <plugin>
+                <groupId>org.openjfx</groupId>
+                <artifactId>javafx-maven-plugin</artifactId>
+                <version>0.0.8</version>
+                <configuration>
+                    <mainClass>presentation.MainApp</mainClass>
+                    <launcher>launch</launcher>
+                    <jlinkZip>false</jlinkZip>
+                </configuration>
+            </plugin>
+
+           <!-- JaCoCo Coverage (Correct Configuration) -->
+<plugin>
+    <groupId>org.jacoco</groupId>
+    <artifactId>jacoco-maven-plugin</artifactId>
+    <version>0.8.12</version>
+
+    <executions>
+        <execution>
+            <id>prepare-agent</id>
             <goals>
-              <goal>checkstyle</goal>
+                <goal>prepare-agent</goal>
             </goals>
-          </execution>
-        </executions>
-        <configuration>
-          <configLocation>google_checks.xml</configLocation>
-          <outputFile>${project.build.directory}/checkstyle-result.xml</outputFile>
-          <outputFileFormat>xml</outputFileFormat>
-        </configuration>
-      </plugin>
+        </execution>
 
-      <!-- PMD -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-pmd-plugin</artifactId>
-        <version>3.27.0</version>
-        <executions>
-          <execution>
-            <id>generate-pmd-report</id>
-            <phase>verify</phase>
-            <goals>
-              <goal>pmd</goal>
-              <goal>cpd-check</goal>
-            </goals>
-          </execution>
-        </executions>
-        <configuration>
-          <format>xml</format>
-          <targetDirectory>${project.build.directory}</targetDirectory>
-          <rulesets>
-            <ruleset>category/java/bestpractices.xml</ruleset>
-            <ruleset>category/java/codestyle.xml</ruleset>
-            <ruleset>category/java/design.xml</ruleset>
-            <ruleset>category/java/documentation.xml</ruleset>
-            <ruleset>category/java/errorprone.xml</ruleset>
-            <ruleset>category/java/multithreading.xml</ruleset>
-            <ruleset>category/java/performance.xml</ruleset>
-            <ruleset>category/java/security.xml</ruleset>
-          </rulesets>
-          <failOnViolation>false</failOnViolation>
-          <includeTests>true</includeTests>
-        </configuration>
-      </plugin>
-
-      <!-- Violations Plugin -->
-      <plugin>
-        <groupId>se.bjurr.violations</groupId>
-        <artifactId>violations-maven-plugin</artifactId>
-        <version>3.1.1</version>
-        <executions>
-          <execution>
-            <id>violations-report</id>
-            <phase>verify</phase>
-            <goals>
-              <goal>violations</goal>
-            </goals>
-          </execution>
-        </executions>
-        <configuration>
-          <checkstyleEnabled>true</checkstyleEnabled>
-          <pmdEnabled>true</pmdEnabled>
-        </configuration>
-      </plugin>
-
-      <!-- TEST RUNNER (IMPORTANT) -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <version>3.1.2</version>
-        <configuration>
-          <useModulePath>false</useModulePath>
-          <argLine>--add-opens java.base/java.lang=ALL-UNNAMED</argLine>
-        </configuration>
-      </plugin>
-
-      <!-- JavaFX Runtime -->
-      <plugin>
-        <groupId>org.openjfx</groupId>
-        <artifactId>javafx-maven-plugin</artifactId>
-        <version>0.0.8</version>
-        <configuration>
-          <mainClass>presentation.MainApp</mainClass>
-          <launcher>launch</launcher>
-          <jlinkZip>false</jlinkZip>
-        </configuration>
-      </plugin>
-
-      <!-- JaCoCo Coverage -->
-      <plugin>
-        <groupId>org.jacoco</groupId>
-        <artifactId>jacoco-maven-plugin</artifactId>
-        <version>0.8.12</version>
-        <executions>
-          <execution>
-            <goals>
-              <goal>prepare-agent</goal>
-            </goals>
-          </execution>
-          <execution>
+        <execution>
             <id>report</id>
             <phase>verify</phase>
             <goals>
-              <goal>report</goal>
+                <goal>report</goal>
             </goals>
             <configuration>
-              <excludes>
-                <!-- Exclude Presentation Layer from Coverage -->
-                 
+                <excludes>
+                    <!-- Exclude whole presentation package -->
                     <exclude>presentation/**</exclude>
-                    <exclude>**/presentation/**</exclude>
-                    <exclude>src/main/java/presentation/**</exclude>
-              </excludes>
+                </excludes>
             </configuration>
-          </execution>
-        </executions>
-      </plugin>
+        </execution>
+    </executions>
+</plugin>
 
-    </plugins>
-  </build>
 
-  <!-- ======================== -->
-  <!--       DEPENDENCIES       -->
-  <!-- ======================== -->
-  <dependencies>
+        </plugins>
+    </build>
 
-    <!-- Mockito Core -->
-    <dependency>
-      <groupId>org.mockito</groupId>
-      <artifactId>mockito-core</artifactId>
-      <version>5.20.0</version>
-      <scope>test</scope>
-    </dependency>
+    <!-- ====================== -->
+    <!--      DEPENDENCIES      -->
+    <!-- ====================== -->
+    <dependencies>
 
-    <!-- Mockito Inline -->
-    <dependency>
-      <groupId>org.mockito</groupId>
-      <artifactId>mockito-inline</artifactId>
-      <version>5.2.0</version>
-      <scope>test</scope>
-    </dependency>
+        <!-- Mockito Core -->
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>5.20.0</version>
+            <scope>test</scope>
+        </dependency>
 
-    <!-- Mockito JUnit Jupiter -->
-    <dependency>
-      <groupId>org.mockito</groupId>
-      <artifactId>mockito-junit-jupiter</artifactId>
-      <version>5.2.0</version>
-      <scope>test</scope>
-    </dependency>
+        <!-- Mockito Inline -->
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-inline</artifactId>
+            <version>5.2.0</version>
+            <scope>test</scope>
+        </dependency>
 
-    <!-- JUnit Jupiter (version controlled by BOM) -->
-    <dependency>
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter</artifactId>
-      <scope>test</scope>
-    </dependency>
+        <!-- Mockito JUnit Jupiter -->
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-junit-jupiter</artifactId>
+            <version>5.2.0</version>
+            <scope>test</scope>
+        </dependency>
 
-    <!-- Java Mail -->
-    <dependency>
-      <groupId>com.sun.mail</groupId>
-      <artifactId>jakarta.mail</artifactId>
-      <version>2.0.2</version>
-    </dependency>
+        <!-- JUnit 5 -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
 
-    <!-- dotenv -->
-    <dependency>
-      <groupId>io.github.cdimascio</groupId>
-      <artifactId>dotenv-java</artifactId>
-      <version>3.2.0</version>
-    </dependency>
+        <!-- Java Mail -->
+        <dependency>
+            <groupId>com.sun.mail</groupId>
+            <artifactId>jakarta.mail</artifactId>
+            <version>2.0.2</version>
+        </dependency>
 
-    <!-- JavaFX -->
-    <dependency>
-      <groupId>org.openjfx</groupId>
-      <artifactId>javafx-controls</artifactId>
-      <version>${javafx.version}</version>
-    </dependency>
+        <!-- dotenv -->
+        <dependency>
+            <groupId>io.github.cdimascio</groupId>
+            <artifactId>dotenv-java</artifactId>
+            <version>3.2.0</version>
+        </dependency>
 
-    <dependency>
-      <groupId>org.openjfx</groupId>
-      <artifactId>javafx-fxml</artifactId>
-      <version>${javafx.version}</version>
-    </dependency>
+        <!-- JavaFX -->
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-controls</artifactId>
+            <version>${javafx.version}</version>
+        </dependency>
 
-  </dependencies>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-fxml</artifactId>
+            <version>${javafx.version}</version>
+        </dependency>
+
+    </dependencies>
 
 </project>
