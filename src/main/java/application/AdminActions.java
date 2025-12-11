@@ -227,7 +227,7 @@ public class AdminActions {
 
         
         try {
-            memberService.findMemberById(memberIdToSearch);
+    return memberService.findMemberById(memberIdToSearch);
         } catch (NullPointerException ex) {
             LOGGER.warning("Member lookup threw NullPointerException: " + ex.getMessage());
         }
