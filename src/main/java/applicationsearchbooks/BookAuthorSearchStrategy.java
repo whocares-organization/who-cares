@@ -26,11 +26,14 @@ public class BookAuthorSearchStrategy implements BookSearchStrategy {
      * @param keyword the author keyword to match
      * @return a list of books whose author contains the keyword
      */
-    @Override
-    public List<Book> searchBook(List<Book> books, String keyword) {
-        if (books == null || keyword == null) return List.of();
-        return books.stream()
-            .filter(b -> b.getAuthor() != null && b.getAuthor().toLowerCase().contains(keyword.toLowerCase()))
-            .collect(Collectors.toList());
-    }
+@Override
+public List<Book> searchBook(List<Book> books, String keyword) {
+    if (books == null || keyword == null) return List.of();
+
+    return books.stream()
+            .filter(b -> b.getAuthor() != null &&
+                         b.getAuthor().toLowerCase().contains(keyword.toLowerCase()))
+            .toList();  
+}
+
 }
