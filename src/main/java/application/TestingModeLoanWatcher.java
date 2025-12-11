@@ -91,7 +91,7 @@ public class TestingModeLoanWatcher implements Runnable {
             } catch (InterruptedException ie) {
                 Thread.currentThread().interrupt();
             } catch (Exception e) {
-   System.ere.println("[TestingModeLoanWatcher] Error: " + e.getMessage());
+  System.err.println("[TestingModeLoanWatcher] Error: " + e.getMessage());
 }
 
         }
