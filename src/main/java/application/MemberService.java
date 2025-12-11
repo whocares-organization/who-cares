@@ -16,7 +16,7 @@ public class MemberService {
 
     private MemberRepository repository;
     private static final Logger LOGGER = Logger.getLogger(MemberService.class.getName());
-
+ private static final String MEMBER_PREFIX = "Member '";
     /**
      * Creates a {@code MemberService} with no repository configured.
      */
@@ -72,7 +72,7 @@ public class MemberService {
         }
       
         repository.addMember(member);
-        LOGGER.info("Member '" + member.getUserName() + "' registered successfully");
+       LOGGER.info(MEMBER_PREFIX + member.getUserName() + "' registered successfully");
         return true;
     }
 
